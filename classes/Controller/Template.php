@@ -139,7 +139,8 @@ protected function _getODBC() {
         $result = array(
             'text' => '',
             'color' => '',
-            'ver' => Arr::get($config, 'ver', ''),
+            //'ver' => Arr::get($config, 'ver', ''),
+            'ver' => BASIS_VERSION,
             'timeUpdate' => Arr::get($config, 'timeUpdate', null),
         );
         
