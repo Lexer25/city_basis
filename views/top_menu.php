@@ -1,4 +1,7 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.'); ?>
+<?php
+//echo Debug::vars('3', Auth::instance()->logged_in('admin'));
+?>
 
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
@@ -35,7 +38,7 @@
                     </div>
                 <?php else: ?>
                     <!-- Форма логина -->
-                    <?php echo Form::open('dashboard', array('method' => 'post', 'class' => 'navbar-form form-inline')); ?>
+                    <?php echo Form::open('login', array('method' => 'post', 'class' => 'navbar-form form-inline')); ?>
                         <?php if (!empty($auth['csrf_token'])): ?>
                             <?php echo Form::hidden('csrf', $auth['csrf_token']); ?>
                         <?php endif; ?>
