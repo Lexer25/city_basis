@@ -22,7 +22,7 @@
 				}
 			}
 			//echo Debug::vars('15', $_POST);exit;
-			echo Debug::vars('15', Auth::instance()->logged_in('admin'));exit;
+			//echo Debug::vars('15', Auth::instance()->logged_in());exit;
 		
                
 			$this->redirect($this->request->referrer());

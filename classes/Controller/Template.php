@@ -1,6 +1,10 @@
 <?php
 // application/classes/Controller/Template.php
 class Controller_Template extends Kohana_Controller_Template {
+	
+	
+	// В Kohana_Controller_Template определено:
+//public $template = 'template'; // имя файла шаблона по умолчанию
     
    protected $is_admin = false;
    public $db = 'fb';
@@ -43,6 +47,7 @@ class Controller_Template extends Kohana_Controller_Template {
         $has_version = isset($this->template->version);
         $has_flash = isset($this->template->flash);
         $has_odbc = isset($this->template->has_odbc);
+		$has_module = isset($this->template->module_info);
      
         // Подготавливаем данные только для отсутствующих ключей
         if (!$has_site) {
@@ -76,6 +81,10 @@ class Controller_Template extends Kohana_Controller_Template {
             $this->template->set('odbc', $this->_getODBC());
         }
 		
+		if (!$has_module) {
+        $module_info = $this->_getCurrentModuleInfo();
+        $this->template->set('module_info', $module_info);
+		}
 		
     }
     
@@ -255,4 +264,80 @@ protected function set_full_width($enabled = true) {
         }
     }
 }
+
+
+
+			/**
+			 * Определение текущего модуля и его версии
+			 */
+			protected function _getCurrentModuleInfo() {
+				$result = array(
+					'name' => '',
+					'version' => '',
+					'full_info' => ''
+				);
+				
+				// Получаем текущий контроллер
+				$controller = $this->request->controller();
+				
+				// Получаем все загруженные модули
+				$modules = Kohana::modules();
+				
+				// Ищем модуль, к которому принадлежит текущий контроллер
+				foreach ($modules as $module_name => $module_path) {
+					// Проверяем, является ли имя контроллера частью имени модуля
+					// или проверяем, находится ли контроллер в директории модуля
+					if (strpos(strtolower($controller), strtolower($module_name)) !== false) {
+						$result['name'] = $module_name;
+						
+						// Пытаемся найти версию модуля
+						$version_constant = strtoupper($module_name) . '_VERSION';
+						if (defined($version_constant)) {
+							$result['version'] = constant($version_constant);
+						} else {
+							// Пытаемся найти версию в init.php модуля
+							$init_file = $module_path . 'init.php';
+							if (file_exists($init_file)) {
+								$content = file_get_contents($init_file);
+								// Ищем определение константы версии
+								preg_match('/define\s*\(\s*[\'"]' . preg_quote($version_constant, '/') . '[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]\s*\)/', $content, $matches);
+								if (!empty($matches[1])) {
+									$result['version'] = $matches[1];
+								}
+							}
+						}
+						
+						// Если версия не найдена, пробуем найти любую константу с _VERSION
+						if (empty($result['version'])) {
+							$all_constants = get_defined_constants();
+							foreach ($all_constants as $const_name => $const_value) {
+								if (strpos($const_name, '_VERSION') !== false) {
+									$possible_module = str_replace('_VERSION', '', $const_name);
+									if (strpos($controller, $possible_module) !== false) {
+										$result['name'] = $possible_module;
+										$result['version'] = $const_value;
+										break;
+									}
+								}
+							}
+						}
+						
+						// Формируем полную информацию
+						if (!empty($result['name']) && !empty($result['version'])) {
+							$result['full_info'] = __('Модуль: :module, Версия: :version', array(
+								':module' => HTML::chars($result['name']),
+								':version' => HTML::chars($result['version'])
+							));
+						}
+						
+						break;
+					}
+				}
+				
+				return $result;
+			}
+
+
+
+
 }

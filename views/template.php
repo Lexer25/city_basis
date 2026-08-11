@@ -71,13 +71,16 @@
         $auth_data = isset($auth) ? $auth : array();
         $version_data = isset($version) ? $version : array();
         $odbc_data = isset($odbc) ? $odbc : array();
-      
+        $module_info_data = isset($module_info) ? $module_info : array();
+   
+
         echo View::factory('top_menu', array(
             'menu_html' => $menu_html,
             'adm_html' => $adm_html,
             'auth' => $auth_data,
             'version' => $version_data,
             'odbc' => $odbc_data,
+            'module_info' => $module_info_data,
         ))->render(); 
         ?>
         <br>

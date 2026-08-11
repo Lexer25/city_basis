@@ -107,7 +107,16 @@
             <br>
             <?php echo __('timerefresh', array('tr' => date("d.m.Y H:i", time()))); ?>
         </div>
-		
+		<!-- Информация о модуле -->
+<?php 
+//echo Debug::vars('112', $module_info);//exit;
+if (!empty($module_info) && !empty($module_info['full_info'])): ?>
+    <div style="padding: 5px 15px;">
+        <span class="label label-primary" style="display: inline-block; margin-right: 10px;">
+            <?php echo $module_info['full_info']; ?>
+        </span>
+    </div>
+<?php endif; ?>
 		
     </div>
 </nav>
