@@ -16,9 +16,6 @@
 	?>
    
     </div>
-<?php
-//вывод номера сборки
-    echo 'City version ' . (defined('CITY_VERSION') ? CITY_VERSION : 'unknown');
-?> 
+
 </div>
 
