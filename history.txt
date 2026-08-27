@@ -1,6 +1,6 @@
 history modules basis
 27.08.2026
-Вер. history
+Вер. 4.0.2
 [+]
 ДОбавлена CITY_BUILD - попытка организовать учет версия Сити
 ДОбавлен history.
