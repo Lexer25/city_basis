@@ -1,6 +1,8 @@
 <?php
 // MODPATH/about/init.php
-defined('BASIS_VERSION') OR define('BASIS_VERSION', '4.0.1');
+defined('BASIS_VERSION') OR define('BASIS_VERSION', '4.0.2');
+defined('CITY_BUILD') OR define('CITY_BUILD', '500');
+
 
 Kohana::$config->load('menu')
     ->set('basis', array(

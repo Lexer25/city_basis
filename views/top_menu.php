@@ -92,9 +92,16 @@
         <!-- Версия -->
         <div>
             <?php 
-			if (!empty($version['text'])): ?>
-                <?php echo $version['text']; ?>
-            <?php endif; ?>
+ 			
+			
+			echo '<br>';
+			if (!empty($version['text'])){ 
+                echo $version['text']; 
+			}; 
+		/* 	echo ' Сборка ' ;
+			echo defined('CITY_BUILD') ? CITY_BUILD : 'Не определена'; */
+			?>
+			
            
         </div>
 		
