@@ -1,25 +1,19 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 
-class Menu_Renderer {
+class Menu_Renderermenu {
     
-    // application/classes/Menu/Renderer.php
-    // Заменяем метод should_display() на этот:
-
     private static function should_display($item)
     {
-        // ЯВНЫЙ ЗАПРЕТ (имеет высший приоритет)
         if (isset($item['disabled']) && $item['disabled'] === true) {
             return false;
         }
         
-        // Если нет условий - всегда показываем
         if (!isset($item['show'])) {
             return true;
         }
         
         $show_config = $item['show'];
         
-        // Проверка авторизации
         if (isset($show_config['logged_in'])) {
             $logged_in = Auth::instance()->logged_in();
             
@@ -32,7 +26,6 @@ class Menu_Renderer {
             }
         }
         
-        // Проверка роли
         if (isset($show_config['roles'])) {
             $roles = (array) $show_config['roles'];
             $has_role = false;
@@ -49,7 +42,6 @@ class Menu_Renderer {
             }
         }
         
-        // Проверка по callable функции
         if (isset($show_config['callback']) && is_callable($show_config['callback'])) {
             if (!call_user_func($show_config['callback'], $item)) {
                 return false;
@@ -59,10 +51,6 @@ class Menu_Renderer {
         return true;
     }
     
-    /**
-     * Получить все пункты меню с учетом условий отображения
-     * @return array
-     */
     public static function get_visible_items($name)
     {
         $all_items = Kohana::$config->load($name)->as_array();
@@ -70,7 +58,6 @@ class Menu_Renderer {
         
         foreach ($all_items as $key => $item) {
             if (self::should_display($item)) {
-                // Рекурсивно фильтруем дочерние пункты
                 if (isset($item['children']) && !empty($item['children'])) {
                     $visible_children = array();
                     foreach ($item['children'] as $child_key => $child) {
@@ -80,7 +67,6 @@ class Menu_Renderer {
                     }
                     $item['children'] = $visible_children;
                     
-                    // Если у родителя нет видимых дочерних пунктов, скрываем и его
                     if (empty($visible_children)) {
                         continue;
                     }
@@ -90,7 +76,6 @@ class Menu_Renderer {
             }
         }
         
-        // Сортируем
         uasort($visible_items, function($a, $b) {
             $order_a = isset($a['order']) ? $a['order'] : 999;
             $order_b = isset($b['order']) ? $b['order'] : 999;
@@ -100,51 +85,38 @@ class Menu_Renderer {
         return $visible_items;
     }
     
-    // application/classes/Menu/Renderer.php
-    /**
-     * Получить URL пункта меню
-     */
     private static function get_url($item)
     {
         if (isset($item['route'])) {
             $params = isset($item['params']) ? $item['params'] : array();
-            // URL::site() добавит базовый путь
             return URL::site(Route::get($item['route'])->uri($params));
             
         } elseif (isset($item['url'])) {
             $url = $item['url'];
             
-            // Обработка специальных ссылок
             if (empty($url)) {
                 return '#';
             }
             
-            // Внешние ссылки не трогаем
             if (strpos($url, 'http://') === 0 || 
                 strpos($url, 'https://') === 0 || 
                 strpos($url, '//') === 0) {
                 return $url;
             }
             
-            // Якоря и javascript
             if (strpos($url, '#') === 0 || strpos($url, 'javascript:') === 0) {
                 return $url;
             }
             
-            // Нормализация: добавляем ведущий слеш если его нет
             if ($url[0] !== '/') {
                 $url = '/' . $url;
             }
             
-            // КЛЮЧЕВОЙ МОМЕНТ: добавляем базовый путь Kohana
             return URL::site($url);
         }
         return '#';
     }
     
-    /**
-     * Проверить, активен ли пункт меню
-     */
     private static function is_active($item, $current_uri = null)
     {
         if ($current_uri === null) {
@@ -153,22 +125,18 @@ class Menu_Renderer {
         
         $item_url = self::get_url($item);
         
-        // Точное совпадение
         if ($current_uri === $item_url) {
             return true;
         }
         
-        // Для корневого URL
         if ($item_url === '/' && $current_uri === '') {
             return true;
         }
         
-        // Для вложенных URL
         if ($item_url !== '/' && strpos($current_uri, $item_url) === 0) {
             return true;
         }
         
-        // Ручное указание активных URL
         if (isset($item['active_for'])) {
             $active_for = (array) $item['active_for'];
             foreach ($active_for as $pattern) {
@@ -181,9 +149,6 @@ class Menu_Renderer {
         return false;
     }
     
-    /**
-     * Рекурсивно отрендерить пункты меню
-     */
     private static function render_items($items, $current_uri, $depth = 0)
     {
         $html = '';
@@ -192,7 +157,6 @@ class Menu_Renderer {
             $is_active = self::is_active($item, $current_uri);
             $has_children = isset($item['children']) && !empty($item['children']);
             
-            // Формируем классы
             $li_classes = array();
             if ($is_active) {
                 $li_classes[] = 'active';
@@ -204,7 +168,6 @@ class Menu_Renderer {
             
             $html .= '<li' . $li_class_attr . '>';
             
-            // Ссылка
             $url = self::get_url($item);
             $icon_html = isset($item['icon']) ? '<i class="' . $item['icon'] . '"></i> ' : '';
             
@@ -216,7 +179,6 @@ class Menu_Renderer {
             
             $data_attr = $has_children ? ' data-toggle="dropdown"' : '';
             
-            // Добавляем data-атрибуты для подсказки
             $order = isset($item['order']) ? $item['order'] : 999;
             $data_attr .= ' data-menu-title="' . HTML::chars($item['title']) . '"';
             $data_attr .= ' data-menu-order="' . $order . '"';
@@ -229,7 +191,6 @@ class Menu_Renderer {
             }
             $html .= '</a>';
             
-            // Вложенные пункты
             if ($has_children && !empty($item['children'])) {
                 $html .= '<ul class="dropdown-menu">';
                 foreach ($item['children'] as $child_key => $child) {
@@ -259,9 +220,6 @@ class Menu_Renderer {
         return $html;
     }
     
-    /**
-     * Отрендерить меню
-     */
     public static function render($name='menu', $ul_class = 'nav')
     {
         $items = self::get_visible_items($name);
@@ -271,20 +229,17 @@ class Menu_Renderer {
             return '';
         }
         
-        $class_attr = $ul_class ? ' class="' . $ul_class . '"' : '';
+        // Добавляем класс 'nav-inline' для горизонтального меню
+        $class_attr = $ul_class ? ' class="' . $ul_class . ' nav-inline"' : ' class="nav-inline"';
         $html = '<ul' . $class_attr . '>';
         $html .= self::render_items($items, $current_uri);
         $html .= '</ul>';
         
-        // Добавляем CSS и JS для подсказок (только один раз)
         $html .= self::get_tooltip_assets();
         
         return $html;
     }
     
-    /**
-     * Получить CSS и JS для подсказок
-     */
     private static function get_tooltip_assets()
     {
         static $loaded = false;
@@ -297,7 +252,128 @@ class Menu_Renderer {
         
         return '
         <style>
-            /* Стили для всплывающей подсказки */
+            /* Горизонтальное меню - ВСЕ В ОДНУ СТРОКУ */
+            .nav-inline {
+                display: flex !important;
+                flex-wrap: nowrap !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                list-style: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+            
+            .nav-inline > li {
+                display: flex !important;
+                flex: 0 1 auto !important;
+                min-width: 0 !important;
+                position: relative !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .nav-inline > li > a {
+                display: flex !important;
+                align-items: center !important;
+                padding: 8px 10px !important;
+                white-space: nowrap !important;
+                font-size: 13px !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                min-width: 0 !important;
+            }
+            
+            /* Уменьшаем отступы для компактности */
+            .nav-inline > li:first-child > a {
+                padding-left: 0 !important;
+            }
+            
+            .nav-inline > li:last-child > a {
+                padding-right: 0 !important;
+            }
+            
+            /* Иконки */
+            .nav-inline > li > a i {
+                margin-right: 4px !important;
+                flex-shrink: 0 !important;
+            }
+            
+            /* Выпадающие меню */
+            .nav-inline .dropdown-menu {
+                position: absolute !important;
+                top: 100% !important;
+                left: 0 !important;
+                z-index: 1000 !important;
+                display: none !important;
+                min-width: 180px !important;
+                padding: 5px 0 !important;
+                margin: 2px 0 0 !important;
+                background-color: #fff !important;
+                border: 1px solid #ccc !important;
+                border-radius: 4px !important;
+                box-shadow: 0 6px 12px rgba(0,0,0,.175) !important;
+                white-space: nowrap !important;
+            }
+            
+            .nav-inline .dropdown-menu > li {
+                display: block !important;
+            }
+            
+            .nav-inline .dropdown-menu > li > a {
+                display: block !important;
+                padding: 3px 20px !important;
+                color: #333 !important;
+                white-space: nowrap !important;
+            }
+            
+            .nav-inline .dropdown:hover .dropdown-menu {
+                display: block !important;
+            }
+            
+            .nav-inline .dropdown.open .dropdown-menu {
+                display: block !important;
+            }
+            
+            /* Автоматическое сжатие при нехватке места */
+            @media (max-width: 1200px) {
+                .nav-inline > li > a {
+                    padding: 6px 8px !important;
+                    font-size: 12px !important;
+                }
+                
+                .nav-inline > li > a i {
+                    margin-right: 3px !important;
+                }
+            }
+            
+            @media (max-width: 992px) {
+                .nav-inline > li > a {
+                    padding: 5px 6px !important;
+                    font-size: 11px !important;
+                }
+                
+                .nav-inline > li > a i {
+                    margin-right: 2px !important;
+                    font-size: 12px !important;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .nav-inline > li > a {
+                    padding: 4px 5px !important;
+                    font-size: 10px !important;
+                }
+                
+                .nav-inline > li > a i {
+                    margin-right: 2px !important;
+                    font-size: 11px !important;
+                }
+            }
+            
+            /* Стили для подсказок */
             .menu-tooltip {
                 position: fixed;
                 background: rgba(0, 0, 0, 0.9);
@@ -313,6 +389,7 @@ class Menu_Renderer {
                 max-width: 320px;
                 font-family: Arial, sans-serif;
                 border: 1px solid rgba(255,255,255,0.1);
+                white-space: nowrap;
             }
             
             .menu-tooltip.visible {
@@ -362,6 +439,27 @@ class Menu_Renderer {
                 border-top: none;
                 border-bottom: 8px solid rgba(0, 0, 0, 0.9);
             }
+            
+            /* Обертка для скролла если совсем не помещается */
+            .nav-inline-wrapper {
+                overflow-x: auto !important;
+                overflow-y: visible !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: thin !important;
+            }
+            
+            .nav-inline-wrapper::-webkit-scrollbar {
+                height: 4px !important;
+            }
+            
+            .nav-inline-wrapper::-webkit-scrollbar-thumb {
+                background: #888 !important;
+                border-radius: 2px !important;
+            }
+            
+            .nav-inline-wrapper::-webkit-scrollbar-thumb:hover {
+                background: #555 !important;
+            }
         </style>
         
         <script>
@@ -388,12 +486,10 @@ class Menu_Renderer {
                     tooltip.querySelector(\'.tooltip-order\').textContent = \'Порядок: \' + data.order;
                     tooltip.querySelector(\'.tooltip-url\').textContent = \'URL: \' + data.url;
                     
-                    // Позиционирование
                     const rect = currentTarget.getBoundingClientRect();
                     let top = rect.bottom + 10;
                     let left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2);
                     
-                    // Проверяем границы
                     const tooltipRect = tooltip.getBoundingClientRect();
                     
                     if (top + tooltipRect.height > window.innerHeight - 10) {
@@ -436,12 +532,10 @@ class Menu_Renderer {
                     
                     currentTarget = target;
                     
-                    // Если уже есть таймер - отменяем
                     if (tooltipTimer) {
                         clearTimeout(tooltipTimer);
                     }
                     
-                    // Запускаем таймер на 1 секунды
                     tooltipTimer = setTimeout(function() {
                         showTooltip(event, {
                             title: title,
@@ -477,7 +571,6 @@ class Menu_Renderer {
                     }
                 }
                 
-                // Инициализация после загрузки DOM
                 if (document.readyState === \'loading\') {
                     document.addEventListener(\'DOMContentLoaded\', initTooltips);
                 } else {
@@ -485,7 +578,7 @@ class Menu_Renderer {
                 }
                 
                 function initTooltips() {
-                    const menuItems = document.querySelectorAll(\'.nav li > a, .dropdown-menu li > a\');
+                    const menuItems = document.querySelectorAll(\'.nav-inline li > a, .dropdown-menu li > a\');
                     menuItems.forEach(function(item) {
                         item.addEventListener(\'mouseenter\', handleMouseEnter);
                         item.addEventListener(\'mouseleave\', handleMouseLeave);

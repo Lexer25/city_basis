@@ -1,7 +1,4 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.'); ?>
-<?php
-//echo Debug::vars('3', Auth::instance()->logged_in('admin'));
-?>
 
 <nav class="navbar navbar-default navbar-fixed-top disable" role="navigation">
     <div class="container-fluid">
@@ -16,7 +13,43 @@
             <?php echo isset($adm_html) ? $adm_html : ''; ?>
         </div>
         
-        <!-- Авторизация -->
+        <!-- Левая часть: версия, ODBC, время, модуль -->
+        <div style="float: left; padding: 5px 0;">
+            <!-- Версия и сборка - первая строка -->
+            <div style="font-size: 12px; color: #777; white-space: nowrap;">
+                <?php 
+                if (!empty($version['text'])){ 
+                    echo $version['text']; 
+                } 
+                ?>
+                <?php if (defined('CITY_BUILD')): ?>
+                    <span style="margin-left: 5px;">Сборка <?php echo CITY_BUILD; ?></span>
+                <?php endif; ?>
+            </div>
+            
+            <!-- ODBC - вторая строка -->
+            <?php if (!empty($odbc['dsn'])): ?>
+                <div style="font-size: 12px; color: #777; white-space: nowrap;">
+                    <?php echo __('ODBC :odbc', array(':odbc'=>$odbc['dsn'])); ?>
+                </div>
+            <?php endif; ?>
+            
+            <!-- Время - третья строка -->
+            <div style="font-size: 12px; color: #777; white-space: nowrap;">
+                <?php echo __('timerefresh', array('tr' => date("d.m.Y H:i", time()))); ?>
+            </div>
+            
+            <!-- Информация о модуле - четвертая строка -->
+            <?php if (!empty($module_info) && !empty($module_info['full_info'])): ?>
+                <div style="padding: 2px 0;">
+                    <span class="label label-primary">
+                        <?php echo $module_info['full_info']; ?>
+                    </span>
+                </div>
+            <?php endif; ?>
+        </div>
+        
+        <!-- Правая часть: авторизация -->
         <ul class="nav navbar-nav navbar-right">
             <li>
                 <?php if (!empty($auth['logged_in'])): ?>
@@ -88,42 +121,6 @@
                 <?php endif; ?>
             </li>
         </ul>
-
-        <!-- Версия -->
-        <div>
-            <?php 
- 			
-			
-			echo '<br>';
-			if (!empty($version['text'])){ 
-                echo $version['text']; 
-			}; 
-		/* 	echo ' Сборка ' ;
-			echo defined('CITY_BUILD') ? CITY_BUILD : 'Не определена'; */
-			?>
-			
-           
-        </div>
-		
-		<!-- odbc имя -->
-        <div>
-		
-            <?php if (!empty($odbc['dsn'])): ?>
-                <?php echo __('ODBC :odbc', array(':odbc'=>$odbc['dsn'])); ?>
-            <?php endif; ?>
-            <br>
-            <?php echo __('timerefresh', array('tr' => date("d.m.Y H:i", time()))); ?>
-        </div>
-		<!-- Информация о модуле -->
-<?php 
-//echo Debug::vars('112', $module_info);//exit;
-if (!empty($module_info) && !empty($module_info['full_info'])): ?>
-    <div style="padding: 5px 15px;">
-        <span class="label label-primary" style="display: inline-block; margin-right: 10px;">
-            <?php echo $module_info['full_info']; ?>
-        </span>
-    </div>
-<?php endif; ?>
-		
+        
     </div>
 </nav>

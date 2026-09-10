@@ -60,8 +60,8 @@ class Controller_Template extends Kohana_Controller_Template {
         
         if (!$has_menu) {
             $this->template->set('menu', array(
-                'menu_html' => Menu_Renderer::render('menu', 'nav navbar-nav'),
-                'adm_html' => Menu_Renderer::render('adm', 'nav navbar-nav'),
+                'menu_html' => Menu_Renderermenu::render('menu', 'nav navbar-nav'),
+                'adm_html' => Menu_Renderermenu::render('adm', 'nav navbar-nav'),
             ));
         }
         
