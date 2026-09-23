@@ -134,7 +134,7 @@ class Kohana_Database_PDO extends Database {
 
 	public function query($type, $sql, $as_object = FALSE, array $params = NULL)
 	{
-		Kohana::$log->add(Log::INFO, '137 ' . Debug::vars($type, $sql));
+		//Kohana::$log->add(Log::INFO, '137 ' . Debug::vars($type, $sql));
 		// Make sure the database is connected
 		$this->_connection or $this->connect();
 
