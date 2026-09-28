@@ -851,6 +851,7 @@ class Model_Stat extends Model
 		$res=array();
 		
 		foreach ($query as $key=>$value)
+		{
 			$res[$value['ID_DOOR']]['ID_DEVTYPE']=Arr::get($value, 'ID_DEVTYPE');//тип устройства
 			$res[$value['ID_DOOR']]['ID_DOOR']=Arr::get($value, 'ID_DOOR');//id точки прохода
 			$res[$value['ID_DOOR']]['SERVER_NAME']=iconv('windows-1251','UTF-8', Arr::get($value, 'S_NAME'));// название транспортного сервера
