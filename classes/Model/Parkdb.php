@@ -30,9 +30,7 @@ class Model_Parkdb extends Model {
         $this->db_path = iconv('cp866','UTF-8//IGNORE', Arr::get($this->aboutDB($_connectName), 'pathDB'));
         $this->serverIP = iconv('cp866','UTF-8//IGNORE', Arr::get($this->aboutDB($_connectName), 'Server'));
 
-        //echo Debug::vars('29', $this->aboutDB()); exit;
         $this->serverPort=3050;
-        //echo Debug::vars('35', $_connectName, $this); exit;
     }
 
 
@@ -41,11 +39,10 @@ class Model_Parkdb extends Model {
         $_fbinfo=Kohana::$config->load('database')->$sourcename;
         $_connection=Arr::get($_fbinfo, 'connection');
         $_dsn=Arr::get($_connection, 'dsn');
-        //echo Debug::vars('13', Arr::get(explode(":", $_dsn), 1));
 
         //$reg=shell_exec('C:\Windows\system32\reg.exe query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ODBC\ODBC.INI\SDuo" /v "Database"');
         $reg=shell_exec('C:\Windows\system32\reg.exe query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ODBC\ODBC.INI\\'.Arr::get(explode(":", $_dsn), 1).'" /v "Database"');
-//		echo Debug::vars('43', shell_exec('C:\Windows\system32\reg.exe query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ODBC\ODBC.INI\\'.Arr::get(explode(":", $_dsn), 1)));exit;
+
         $_aaa=explode("REG_SZ", $reg);
 
         $reg=shell_exec('C:\Windows\system32\reg.exe query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\ODBC\ODBC.INI\\'.Arr::get(explode(":", $_dsn), 1).'" /v "Server"');
@@ -90,7 +87,7 @@ class Model_Parkdb extends Model {
             ->execute(Database::instance('fb'))
             ->get('MIN');
 
-//		echo Debug::vars('44', $_aaa, $_ip);exit;
+
         return array('connectName'=>$sourcename,
             'dsn'=>$_dsn,
             'pathDB'=>trim(Arr::get($_aaa, 1)),
@@ -111,7 +108,6 @@ class Model_Parkdb extends Model {
         $sql='select distinct RDB$RELATION_NAME
 				from RDB$RELATION_FIELDS
 				where RDB$RELATION_NAME=\''.$table.'\'';
-        //echo Debug::vars('12', $sql); exit;
 
         $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -133,7 +129,6 @@ class Model_Parkdb extends Model {
         $sql='select distinct * from  RDB$PROCEDURES
 			where RDB$PROCEDURE_name = \''.$name.'\'';
 
-        //echo Debug::vars('12', $sql); exit;
 
         $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -153,7 +148,6 @@ class Model_Parkdb extends Model {
         $sql='select distinct * from rdb$GENERATORS
     where rdb$GENERATOR_name=\'GEN_'.$name.'_ID\'';
 
-        //echo Debug::vars('12', $sql); exit;
 
         $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -174,7 +168,6 @@ class Model_Parkdb extends Model {
         $sql='select distinct * from rdb$triggers
     where rdb$trigger_name=\''.$name.'\'';
 
-        //echo Debug::vars('123', $sql); exit;
 
         $query = DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -228,8 +221,6 @@ class Model_Parkdb extends Model {
 
         $sql='select Rdb$Description from Rdb$Relations
 			where Rdb$Relation_Name=\''.$tableName.'\'';
-        //	echo Debug::vars('87', $sql);exit;
-        //$this->makeQuery($sql);
 
         $query = Arr::flatten(DB::query(Database::SELECT, $sql)
             ->execute(Database::instance('fb'))
@@ -259,7 +250,6 @@ class Model_Parkdb extends Model {
     //Добавление данных в указанную таблицу
     public function addTableData($name)
     {
-        //echo Debug::vars('99', $name.'.sql');exit;
         $ttt='"C:\Program Files (x86)\Firebird\Firebird_1_5_6\bin\isql.exe" "'.$this->serverIP.'/'.$this->serverPort.':'.$this->db_path.'" -user sysdba -pass temp -i "C:\xampp\htdocs\parkresident\modules\setup\config\sql\data\\'.$name.'.sql"';
 		exec(iconv('UTF-8', 'CP1251', $ttt));
 
@@ -276,13 +266,10 @@ class Model_Parkdb extends Model {
 
         Log::instance()->add(Log::DEBUG, Debug::vars('158 выполняю команду добавления таблицы :', iconv('UTF-8', 'CP1251', $ttt)));
         $result=exec(iconv('UTF-8', 'CP1251', $ttt), $retval, $output);
-        /* echo Debug::vars('181', $result, $output);exit;
-        Log::instance()->add(Log::DEBUG, '159 результат добавления таблицы : '. Debug::vars($result));	*/
         Log::instance()->add(Log::DEBUG, '159-1 результат добавления таблицы : '. Debug::vars($output));
         if($output==0) return true;
         return false;
-        // echo Debug::vars('159 результат добавления таблицы :', exec(iconv('UTF-8', 'CP1251', $ttt)));
-    }
+     }
 
     public function delGenerator($name)
     {

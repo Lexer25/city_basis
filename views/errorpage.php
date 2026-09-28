@@ -10,13 +10,10 @@
     <title>Artonit City <?echo  isset(Kohana::$config->load('artonitcity_config')->city_name)? Kohana::$config->load('artonitcity_config')->city_name : '';?></title>
 
     <!-- Bootstrap core CSS -->
-    <?= HTML::style('static/css/bootstrap.css'); ?>
-	<?= HTML::style('static/css/modal.css'); ?>
-    <?//= HTML::style('static/css/admin.css'); ?>
-	<?//= HTML::style('static/css/timesheet.css'); ?>
-	<?= HTML::style('static/css/city.css'); ?>
-	<?//= HTML::style('static/css/modal.css'); ?>
-	<link rel="stylesheet" href="/city/static/css/themes/blue/style.css" type="text/css" media="print, projection, screen" />
+    <?php echo HTML::style('static/css/bootstrap.css'); ?>
+	<?php echo HTML::style('static/css/modal.css'); ?>
+	<?php echo HTML::style('static/css/city.css'); ?>
+	<?php echo HTML::style('static/css/themes/blue/style.css', array('media' => 'print, projection, screen')); ?>
 	 
 
   </head>
@@ -50,8 +47,8 @@
 				
 				<?
 				
-				//	echo Debug::vars('17', mb_detect_encoding($err, ['UTF-8', 'Windows-1251', 'KOI8-R', 'ISO-8859-5']));//exit;
-				echo date('Y.m.d H:m', time()). '<br>'. iconv('CP1251', 'UTF-8//IGNORE', $err);
+				echo date('Y.m.d H:i', time()) . '<br>'
+   . htmlspecialchars($err, ENT_QUOTES, 'UTF-8');
 				
 				?>
 				

@@ -29,7 +29,7 @@ class Controller_Template extends Kohana_Controller_Template {
         if (!is_object($this->template)) {
             return;
         }
- // echo Debug::vars('19', $this);exit;      
+    
         $config = Kohana::$config->load('artonitcity_config');
         $this->_prepareTemplateData($config);
     }
@@ -93,8 +93,7 @@ class Controller_Template extends Kohana_Controller_Template {
  */
 protected function _getODBC() {
     $config = Kohana::$config->load('database');
-	//echo Debug::vars('78', $config['fb']['connection']['dsn']);exit;
-    $result=array(
+	$result=array(
 		
 		'dsn'=> isset($config['fb']['connection']['dsn'])?  $config['fb']['connection']['dsn'] : '---',
 	

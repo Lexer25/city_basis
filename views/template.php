@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Artonit City - панель управления СКУД Артонит">
     <meta name="author" content="www.artonit.ru">
-    <link rel="shortcut icon" href="/city/favicon.ico">
+    <link rel="shortcut icon" href="<?php echo URL::base(); ?>favicon.ico">
 
     <title>
         Artonit City 
@@ -20,23 +20,23 @@
     </title>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="/city/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/city/static/css/bootstrap-datetimepicker.min.css">
-    <link rel="stylesheet" href="/city/static/css/modal.css">
-    <link rel="stylesheet" href="/city/static/css/city.css">
-    <link rel="stylesheet" href="/city/static/css/2.31.3/theme.blue.min.css">
-    <link rel="stylesheet" href="/city/static/css/2.31.3/jquery.tablesorter.pager.min.css">
-    <link rel="stylesheet" href="/city/static/css/jquery-ui.css">
+    <?php echo HTML::style('static/css/bootstrap.min.css'); ?>
+	<?php echo HTML::style('static/css/bootstrap-datetimepicker.min.css'); ?>
+	<?php echo HTML::style('static/css/modal.css'); ?>
+	<?php echo HTML::style('static/css/city.css'); ?>
+	<?php echo HTML::style('static/css/2.31.3/theme.blue.min.css'); ?>
+	<?php echo HTML::style('static/css/2.31.3/jquery.tablesorter.pager.min.css'); ?>
+	<?php echo HTML::style('static/css/jquery-ui.css'); ?>
     
     <!-- JavaScript -->
-    <script src="/city/static/js/jquery-2.2.4.js"></script>
-    <script src="/city/static/js/jquery-ui.min.js"></script>
-    <script src="/city/static/js/moment-with-locales.min.js"></script>
-    <script src="/city/static/js/bootstrap.min.js"></script>
-    <script src="/city/static/js/bootstrap-datetimepicker.min.js"></script>
-    <script src="/city/static/js/2.31.3/jquery.tablesorter.min.js"></script>
-    <script src="/city/static/js/2.31.3/jquery.tablesorter.widgets.min.js"></script>
-    <script src="/city/static/js/2.31.3/jquery.tablesorter.pager.min.js"></script>
+    <?php echo HTML::script('static/js/jquery-2.2.4.js'); ?>
+	<?php echo HTML::script('static/js/jquery-ui.min.js'); ?>
+	<?php echo HTML::script('static/js/moment-with-locales.min.js'); ?>
+	<?php echo HTML::script('static/js/bootstrap.min.js'); ?>
+	<?php echo HTML::script('static/js/bootstrap-datetimepicker.min.js'); ?>
+	<?php echo HTML::script('static/js/2.31.3/jquery.tablesorter.min.js'); ?>
+	<?php echo HTML::script('static/js/2.31.3/jquery.tablesorter.widgets.min.js'); ?>
+	<?php echo HTML::script('static/js/2.31.3/jquery.tablesorter.pager.min.js'); ?>
 </head>
 
 <!-- ✅ Запасной вариант, если JS не сработает -->

@@ -34,7 +34,6 @@ class Model_Stat extends Model
 		$query = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-		//echo Debug::vars('12',$query ); exit;
 		$res=array();
 		foreach ($query as $key=>$value)
 		{
@@ -55,7 +54,6 @@ class Model_Stat extends Model
 			->rule('key', 'regex', array(':value', '/[A-F0-9]+/'));//'/[a-fA-F0-9]++$/iD'
 		if($post->check())
 			{
-			 //echo Debug::vars('31', $keycode); exit;	
 			$key=substr(Arr::get($post,'key'),0, 6);
 
 			 $key_arr=str_split ($key);
@@ -84,7 +82,6 @@ class Model_Stat extends Model
 		$result=$result2.', '.$result1;
 				
 			} else {
-				 //echo Debug::vars('60', $keycode); exit;
 				$result='--';
 				
 			}
@@ -116,7 +113,6 @@ class Model_Stat extends Model
 						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr,0))),
 					 6, '0', STR_PAD_LEFT).'001A';
 		
-		//echo Debug::vars('101',$key, dechex ($key), $key_arr, $result2); exit;
 		
 
 		return $result2;
@@ -156,11 +152,9 @@ class Model_Stat extends Model
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-				//echo Debug::vars('556', $query2); exit;
 		Log::instance()->add(Log::NOTICE, $query2);
 		foreach($query2 as $key=>$value){
 				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 8,' .Arr::get($value, 'COUNT').')';
-		//echo Debug::vars('23', $sql); exit;
 	try
 			{
 			$query = DB::query(Database::INSERT, $sql)
@@ -181,11 +175,9 @@ class Model_Stat extends Model
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-				//echo Debug::vars('556', $query2); exit;
 		Log::instance()->add(Log::NOTICE, $query2);
 		foreach($query2 as $key=>$value){
 				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 8,' .Arr::get($value, 'COUNT').')';
-		//echo Debug::vars('23', $sql); exit;
 	try
 			{
 			$query = DB::query(Database::INSERT, $sql)
@@ -201,7 +193,6 @@ class Model_Stat extends Model
 	*/
 	public function fixKeyOnDBCountForDoors($id_door)//  процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 8 KeyCountDB_door
 	{
-		//echo Debug::vars('185', implode(",",$id_door)); exit;
 		$sql='select  ac.id_dev, count(distinct c.id_card) from ss_accessuser ssu
         join card c on ssu.id_pep=c.id_pep
         join access ac on ssu.id_accessname=ac.id_accessname
@@ -224,11 +215,9 @@ class Model_Stat extends Model
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-		//echo Debug::vars('556', $query2); exit;
 		Log::instance()->add(Log::NOTICE, $query2);
 		foreach($query2 as $key=>$value){
 				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 8,' .Arr::get($value, 'COUNT').')';
-		//echo Debug::vars('23', $sql); exit;
 	try
 			{
 			$query = DB::query(Database::INSERT, $sql)
@@ -254,10 +243,8 @@ class Model_Stat extends Model
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-		//		echo Debug::vars('556', $query2); exit;
 		foreach($query2 as $key=>$value){
 				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 11,' .Arr::get($value, 'COUNT').')';
-		//echo Debug::vars('23', $sql); exit;
 	try
 			{
 			$query = DB::query(Database::INSERT, $sql)
@@ -312,7 +299,6 @@ class Model_Stat extends Model
 		$fp = fopen($file_name, "w"); // Открываем файл в режиме записи
 		$mytext ="id_pep;name;surname;patronymic;note;org_name;id_card; timeend\r\n"; // строка данных
 		$test = fwrite($fp, $mytext); // Запись в файл
-		//echo Debug::vars('31', $file_name, $fp); exit;
 		foreach ($res as $key=>$value)
 		{
 			fwrite($fp, implode(";",$value)."\r\n");
@@ -475,7 +461,6 @@ class Model_Stat extends Model
 			$id_parent=$query[0]['ID_PARENT'];
 			$result[]=iconv('windows-1251','UTF-8',$query[0]['NAME']);
 		}
-		//echo Debug::vars('129', implode("/", $result)); exit;
 		
 		return implode("/ ", array_reverse($result));
 	}
@@ -559,7 +544,6 @@ class Model_Stat extends Model
 			$query = DB::query(Database::INSERT, $sql)
 			->execute(Database::instance('fb'));
 		} catch (Exception $e) {
-			//echo Debug::vars('38');
 			
 			
 		}
@@ -587,12 +571,10 @@ class Model_Stat extends Model
 		$id = DB::query(Database::UPDATE, $sql)
 		->execute(Database::instance('fb'));
 		
-		//echo Debug::vars('117', $sql);
 		
 		$sql='delete from st_data std where std.time_insert <\''.date("d.m.Y H:i:s",strtotime("-".$stat_day_befor." days")).'\'';
 		$id = DB::query(Database::UPDATE, $sql)
 		->execute(Database::instance('fb'));
-		//echo Debug::vars('122', $sql);
 	}
 	
 	public function device_list()// получение списка устройства
@@ -624,7 +606,6 @@ class Model_Stat extends Model
 			$res[$value['ID2']]['ID_READER']=Arr::get($value, 'ID_READER');
 			
 		}
-		//echo Debug::vars('34', $res); exit;
 		return $res;
 	}
 	
@@ -728,7 +709,6 @@ class Model_Stat extends Model
   and d2.id_devtype in (1,2, 6)
  group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
  
- //echo Debug::vars(); exit;
  
 		$query = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
@@ -836,17 +816,14 @@ class Model_Stat extends Model
             where d.id_reader is not null
             order by d.id_dev';	
 			
-		//echo Debug::vars('897', $sql); exit;	
 		$query = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
 		
-		//echo Debug::vars('594',microtime(1)-$t1,$sql,  $query); exit;
 		
 		// $bb выборка idколичества карт в контроллерах по данным статистики/
 	
 		//$bb=$this->	GetKeyCountStat_arr();// получили список данных из статистики
-		//echo Debug::vars('595', $bb); exit;
 		$device_count=array();
 		
 		
@@ -864,20 +841,16 @@ class Model_Stat extends Model
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-		//		echo Debug::vars('556', $query2); exit;
 		foreach($query2 as $key=>$value){
 			$device_count[$value['ID_DEV']]=$value['COUNT'];//количество карт по базе данных
 		}
 		
 		$md=array();
 		
-		//echo Debug::vars('680', $device_count ); exit;
 		$t2=microtime(1);
-		//echo Debug::vars('616',$t2-$t1, $query); exit;
 		$res=array();
 		
 		foreach ($query as $key=>$value)
-		{	//echo Debug::vars('937', $value); exit;
 			$res[$value['ID_DOOR']]['ID_DEVTYPE']=Arr::get($value, 'ID_DEVTYPE');//тип устройства
 			$res[$value['ID_DOOR']]['ID_DOOR']=Arr::get($value, 'ID_DOOR');//id точки прохода
 			$res[$value['ID_DOOR']]['SERVER_NAME']=iconv('windows-1251','UTF-8', Arr::get($value, 'S_NAME'));// название транспортного сервера
@@ -909,7 +882,6 @@ class Model_Stat extends Model
 			$res[$value['ID_DOOR']]['READ_COMMON_LIST']=$readCommonList;
 
 		}
-		//echo Debug::vars('565', microtime(1) - $t1, $res);
 		return $res;
 	}
 	
@@ -924,10 +896,8 @@ class Model_Stat extends Model
 			$query = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->as_array();
-			//echo Debug::vars('633', $query); exit;
 			foreach ($query as $key=> $value)
 			{
-				//echo Debug::vars('314',$key, $value); exit;
 				if(!is_null(Arr::get($value, 'ID_READER')))
 				{
 					//заявляю пустые значения массивов
@@ -954,7 +924,6 @@ class Model_Stat extends Model
 				}
 			}
 
-		//echo Debug::vars('219', $res);exit;
 		return $res;
 	}
 	
@@ -1002,7 +971,6 @@ class Model_Stat extends Model
 		join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
 		join st_data std on std.id_dev=d2.id_dev
 		where std.id_order = '.$id_order.' and d.id_dev='.$id_dev;
-		//echo Debug::vars('232', $sql);
 		$query = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
@@ -1016,7 +984,6 @@ class Model_Stat extends Model
 			$res['ID_READER'] = trim(Arr::get($value, 'ID_READER'));
 			$res['TIME_INSERT'] = Arr::get($value, 'TIME_INSERT');
 		}
-		//echo Debug::vars('219', $res);exit;
 		return $res;
 	}
 	
@@ -1051,13 +1018,11 @@ class Model_Stat extends Model
 		//if ($connection === false) die("Cannot connect to server {$server}:{$port}");
 		if ($connection === false) $this->redirect('errorpage?err=Cannot connect to server {$server}:{$port}');
 		$reply = socket_read($socket,4096);
-		//echo Debug::vars('49', $reply);
 		
 		//авторизация
 		socket_write($socket, $smes."\r\n", strlen($smes."\r\n"));
 		//получаем ответ
 		$reply = socket_read($socket,4096);
-		//echo Debug::vars('125', $reply);
 		
 		//проверки связи
 		socket_write($socket, iconv('UTF-8','windows-1251',$smes3)."\r\n", strlen(iconv('UTF-8','windows-1251',$smes3)."\r\n"));
@@ -1137,7 +1102,6 @@ class Model_Stat extends Model
 			$count_50 = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->get('COUNT');
-			//echo Debug::vars('939', $id_dev, $count_50, $sql);
 			$sql='select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'
 				and e.id_eventtype=46
 				and e.id_dev='.$id_dev;
@@ -1152,10 +1116,8 @@ class Model_Stat extends Model
 			->execute(Database::instance('fb'))
 			->get('COUNT');
 			
-			echo Debug::vars('817',$id_dev, $count_50, $count_46, $count_65); exit;
 			$mode='TEST_OFF';
 			if($count_50 == 0 and $count_46 == 0 and $count_65!=0) $mode='TEST_ON';
-			//echo Debug::vars('817',$id_dev, $count_50, $count_46, $count_65, $mode);
 			return $mode;
 		}
 		
@@ -1168,7 +1130,6 @@ class Model_Stat extends Model
 			$count_145 = DB::query(Database::SELECT, $sql)
 			->execute(Database::instance('fb'))
 			->get('COUNT');
-			//echo Debug::vars('831', $count_145); exit;
 			if($count_145 > 0 ) $mode='TEST_ON';
 			return $mode;
 		}
@@ -1187,7 +1148,6 @@ class Model_Stat extends Model
 			$sql='select std.facts from st_data std
 				where std.id_param=113
 				and std.id_dev='.$id_dev;
-			//	echo Debug::vars('1245', $sql);exit;
 			
 			try
 			{

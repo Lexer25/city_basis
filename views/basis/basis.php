@@ -1,7 +1,3 @@
-<?php
-//echo Debug::vars('2', $config_windows);//exit;
-//echo Debug::vars('3', $list_windows1);//exit;
-?>
 <div class="panel panel-primary">
   <div class="panel-heading">
     <h3 class="panel-title"><?php echo __('Панель управления')?></h3>
