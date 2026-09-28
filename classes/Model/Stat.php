@@ -28,7 +28,7 @@ class Model_Stat extends Model
 	
 	
 	
-	public function _date_stat()//получение даты и времени выбора статистики
+	public function __date_stat()//получение даты и времени выбора статистики
 	{
 		$sql='select min (std.time_insert), max (std.time_insert) from st_data std';
 		$query = DB::query(Database::SELECT, $sql)
@@ -118,7 +118,7 @@ class Model_Stat extends Model
 		return $result2;
 	}
 	
-	public function decCommaTo001A($key)// преобразование числа вида 123,34567  к формату 001A
+	public function __decCommaTo001A($key)// преобразование числа вида 123,34567  к формату 001A
 	{
 		
 		$temp=Arr::get(explode( ',', $key), 0)*pow(2,16)+Arr::get(explode( ',', $key), 1);
@@ -128,7 +128,7 @@ class Model_Stat extends Model
 	
 	
 	
-	public function delete_stat_data()// очистка таблицы st_data
+	public function __delete_stat_data()// очистка таблицы st_data
 	{
 		$query = DB::delete('st_data')
 		->execute(Database::instance('fb'));
@@ -136,7 +136,7 @@ class Model_Stat extends Model
 	}
 
 	
-	public function fixKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 8 KeyCountDB_door
+	public function __fixKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 8 KeyCountDB_door
 	{
 		$sql='select  ac.id_dev, count(distinct c.id_card) from ss_accessuser ssu
         join card c on ssu.id_pep=c.id_pep
@@ -231,7 +231,7 @@ class Model_Stat extends Model
 	14.09.2023
 	Карты с просроченным сроком действий, но находящиеся в таблице cardidx
 	*/
-	public function fixOverTimeKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 11
+	public function __fixOverTimeKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 11
 	{
 		$sql='SELECT cd.id_dev, count(cd.id_card) from cardidx cd
 				join card c on c.id_card=cd.id_card
@@ -478,7 +478,7 @@ class Model_Stat extends Model
 	}
 	
 	
-	public function detect_change_device_count()
+	public function __detect_change_device_count()
 	{
 		$stat_day_befor = isset(Kohana::$config->load('artonitcity_config')->stat_day_befor)? Kohana::$config->load('artonitcity_config')->stat_day_befor : 1;
 		//Kohana::$config->write('artonitcity_config', 'test_config', 'data_config');
@@ -532,7 +532,7 @@ class Model_Stat extends Model
 		return 2;
 	}
 	
-	public function GetOrder($id=FALSE)// получение нового ордера для статистики
+	public function __GetOrder($id=FALSE)// получение нового ордера для статистики
 	{
 		$sql='delete from st_data std where std.id_dev in ('.$id.')';
 		$query = DB::query(Database::DELETE, $sql)
@@ -555,7 +555,7 @@ class Model_Stat extends Model
 		return $id;
 	}
 	
-	public function CloseOrder($id)// завершение ордера
+	public function __CloseOrder($id)// завершение ордера
 	{
 		$sql='update st_order set timeend=\'NOW\' where id='.$id;
 		$id = DB::query(Database::UPDATE, $sql)
@@ -618,7 +618,7 @@ class Model_Stat extends Model
 	return $id_order;
 	}
 	
-	public function stat_version_device ()//получение версий устройств по результатам последного опроса
+	public function __stat_version_device ()//получение версий устройств по результатам последного опроса
 	{
 		$sql='select distinct std.facts, count(*) from st_data std
 			join st_order sto on sto.id=std.id_order
@@ -729,7 +729,7 @@ class Model_Stat extends Model
 	}
 	
 	
-	public function count_order_for_notactive()// вывод очереди карт на загрузку
+	public function __count_order_for_notactive()// вывод очереди карт на загрузку
 	{
 		$sql='select cd.operation, cd.id_dev, d.name from cardindev cd
  join device d on d.id_dev=cd.id_dev
