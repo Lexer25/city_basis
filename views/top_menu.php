@@ -7,10 +7,10 @@
         <div class="navbar-collapse collapse">
             <?php echo isset($menu_html) ? $menu_html : ''; ?>
         </div>
-        
+ 
         <!-- Меню администратора, выводится после авторизации-->
         <div class="navbar-collapse collapse">
-            <?php echo isset($adm_html) ? $adm_html : ''; ?>
+            <?php echo ($is_admin) ? $adm_html : ''; ?>
         </div>
         
         <!-- Левая часть: версия, ODBC, время, модуль -->
