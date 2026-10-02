@@ -1,5 +1,22 @@
 <?php defined('SYSPATH') OR die('No direct access allowed.');
 
+/**
+ * Model_Stat — статистика опроса контроллеров СКУД.
+ *
+ * Удалены методы, не вызываемые ни из одной точки проекта
+ * (проверено сплошным поиском по всем *.php):
+ * __date_stat, __decCommaTo001A, __delete_stat_data, __fixKeyOnDBCount,
+ * fixKeyOnDBCountForDoors, __fixOverTimeKeyOnDBCount, del_queue,
+ * Get_unActiveCard, get_org_parent, repeat_load, __detect_change_device_count,
+ * stop_load, __GetOrder, __CloseOrder, device_list, last_stat_order,
+ * __stat_version_device, load_order, __count_order_for_notactive,
+ * load_order_overcount, GetKeyCountStat_arr, GetKeyCountStat,
+ * GetKeyCountDevice, getVersion, getAnalitic_for_Test_mode_ademant,
+ * getAnalitic_for_Test_mode_artonit, getAnyDataFromStdata.
+ *
+ * ВНИМАНИЕ: одноимённые методы есть в Model_Dev (date_stat, load_order)
+ * и Model_People (Get_unActiveCard) — там они и используются.
+ */
 class Model_Stat extends Model
 {
 	public function authmode($authmode)
@@ -26,68 +43,44 @@ class Model_Stat extends Model
 		
 	}
 	
-	
-	
-	public function __date_stat()//получение даты и времени выбора статистики
-	{
-		$sql='select min (std.time_insert), max (std.time_insert) from st_data std';
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res['min'] = Arr::get($value, 'MIN', 'not');
-			$res['max'] = Arr::get($value, 'MAX', 'not');
-		}
-		return $res;
-		
-	}
-	
-	
 	public function reviewKeyCode($keycode)// преобразование кода 001А к цифрам
 	{
-		 //$keycode='7627DE001A';
-		 //$keycode='No_card';
-		 $post=Validation::factory(array('key'=>trim($keycode)));
-		 $post->rule('key', 'not_empty')
+		//$keycode='7627DE001A';
+		//$keycode='No_card';
+		$post=Validation::factory(array('key'=>trim($keycode)));
+		$post->rule('key', 'not_empty')
 			->rule('key', 'regex', array(':value', '/[A-F0-9]+/'));//'/[a-fA-F0-9]++$/iD'
 		if($post->check())
-			{
+		{
 			$key=substr(Arr::get($post,'key'),0, 6);
-
-			 $key_arr=str_split ($key);
-
-			 $numReverse2=array('0', '8','4','C','2','A','6','E','1','9','5','D','3','B','7','F');
-
-
-			 
-			 $result1 = hexdec(Arr::get($numReverse2, hexdec(Arr::get($key_arr, 5)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr,4))))
-						 .','. str_pad(hexdec(Arr::get($numReverse2,hexdec(Arr::get($key_arr, 3)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 
-		0)))), 5, '0', STR_PAD_LEFT);
-
 			
-			 $result2 = str_pad(hexdec(Arr::get($numReverse2, 
+			$key_arr=str_split ($key);
+			
+			$numReverse2=array('0', '8','4','C','2','A','6','E','1','9','5','D','3','B','7','F');
+			
+			$result1 = hexdec(Arr::get($numReverse2, hexdec(Arr::get($key_arr, 5)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr,4))))
+						.','. str_pad(hexdec(Arr::get($numReverse2,hexdec(Arr::get($key_arr, 3)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 
+		0)))), 5, '0', STR_PAD_LEFT);
+			
+			$result2 = str_pad(hexdec(Arr::get($numReverse2, 
 					hexdec(Arr::get($key_arr, 5)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 4)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 3)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 4)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 3)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
+						.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 
 		0)))), 10, '0', STR_PAD_LEFT);
-		$result=$result2.', '.$result1;
-				
-			} else {
-				$result='--';
-				
-			}
-		 
-		 
-
+			$result=$result2.', '.$result1;
+			
+		} else {
+			$result='--';
+			
+		}
+		
 		return $result;
 	}
 	
@@ -96,82 +89,29 @@ class Model_Stat extends Model
 		//7627DE 001A	123,58478	0008119406 ->hex 7be46e
 		//
 		//получаю 7627DE
-
+		
 		//$key='0008119406';
 		
 		$key_arr=str_split(str_pad(dechex ($key), 6, "0", STR_PAD_LEFT));
-		 $numReverse2=array('0', '8','4','C','2','A','6','E','1','9','5','D','3','B','7','F');
-		 
-
-		 
-			 $result2 = str_pad(
-						  Arr::get($numReverse2,hexdec(Arr::get($key_arr, 5)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 4)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 3)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
-						 .Arr::get($numReverse2, hexdec(Arr::get($key_arr,0))),
-					 6, '0', STR_PAD_LEFT).'001A';
+		$numReverse2=array('0', '8','4','C','2','A','6','E','1','9','5','D','3','B','7','F');
 		
+		$result2 = str_pad(
+					Arr::get($numReverse2,hexdec(Arr::get($key_arr, 5)))
+					.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 4)))
+					.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 3)))
+					.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 2)))
+					.Arr::get($numReverse2, hexdec(Arr::get($key_arr, 1)))
+					.Arr::get($numReverse2, hexdec(Arr::get($key_arr,0))),
+					6, '0', STR_PAD_LEFT).'001A';
 		
-
 		return $result2;
 	}
-	
-	public function __decCommaTo001A($key)// преобразование числа вида 123,34567  к формату 001A
-	{
-		
-		$temp=Arr::get(explode( ',', $key), 0)*pow(2,16)+Arr::get(explode( ',', $key), 1);
-		return $this->decDigitTo001A($temp);
-	}
-	
-	
-	
-	
-	public function __delete_stat_data()// очистка таблицы st_data
-	{
-		$query = DB::delete('st_data')
-		->execute(Database::instance('fb'));
-		
-	}
-
-	
-	public function __fixKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 8 KeyCountDB_door
-	{
-		$sql='select  ac.id_dev, count(distinct c.id_card) from ss_accessuser ssu
-        join card c on ssu.id_pep=c.id_pep
-        join access ac on ssu.id_accessname=ac.id_accessname
-        where
-        c."ACTIVE">0
-        and (c.timeend>\'NOW\' or c.timeend is null)
-		and c.id_cardtype in (1,2)
-        group by ac.id_dev';
-		
-	
-		
-		$query2 = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		Log::instance()->add(Log::NOTICE, $query2);
-		foreach($query2 as $key=>$value){
-				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 8,' .Arr::get($value, 'COUNT').')';
-	try
-			{
-			$query = DB::query(Database::INSERT, $sql)
-			->execute(Database::instance('fb'));
-			} catch (Exception $e) {
-			}
-		}
-	}
-	
 	
 	public function fixKeyOnCardidx()// 15.08.2024 сколько карт в контроллеры по таблице cardidx
 	{
 		$sql='select  cdx.id_dev, count(distinct cdx.id_card) from cardidx cdx
 			group by cdx.id_dev';
 		
-	
-		
 		$query2 = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
@@ -186,83 +126,9 @@ class Model_Stat extends Model
 			}
 		}
 	}
-	
-	
-	/* 16.04.2024
-	надо иметь возмжность фиксировать данные для конкретной точки прохода/ Точки прохода передаются как массив, их может быть мног.
-	*/
-	public function fixKeyOnDBCountForDoors($id_door)//  процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 8 KeyCountDB_door
-	{
-		$sql='select  ac.id_dev, count(distinct c.id_card) from ss_accessuser ssu
-        join card c on ssu.id_pep=c.id_pep
-        join access ac on ssu.id_accessname=ac.id_accessname
-        where
-        c."ACTIVE">0
-        and (c.timeend>\'NOW\' or c.timeend is null)
-		and c.id_cardtype in (1,2)
-		and ac.id_dev in('.implode(",",$id_door).')
-        group by ac.id_dev';
-		
-		$sql2='select  ac.id_dev, count(distinct c.id_card) from ss_accessuser ssu
-        join card c on ssu.id_pep=c.id_pep
-        join access ac on ssu.id_accessname=ac.id_accessname
-        where
-        c."ACTIVE">0
-        and c.id_cardtype in (1,2)
-		and ac.id_dev in('.implode(",",$id_door).')
-        group by ac.id_dev';
-		
-		$query2 = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		Log::instance()->add(Log::NOTICE, $query2);
-		foreach($query2 as $key=>$value){
-				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 8,' .Arr::get($value, 'COUNT').')';
-	try
-			{
-			$query = DB::query(Database::INSERT, $sql)
-			->execute(Database::instance('fb'));
-			} catch (Exception $e) {
-			}
-		}
-	}
-	
-	/*
-	14.09.2023
-	Карты с просроченным сроком действий, но находящиеся в таблице cardidx
-	*/
-	public function __fixOverTimeKeyOnDBCount()// 28.02.2020 процедура делает расчет количества карт по базе данных для каждой точки прохода и заносит эти данные в таблицу ST_DATA как параметр 11
-	{
-		$sql='SELECT cd.id_dev, count(cd.id_card) from cardidx cd
-				join card c on c.id_card=cd.id_card
-				where c.timeend<\'now\'
-				group by cd.id_dev
-				order by cd.id_dev';
-		
-		
-		$query2 = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		foreach($query2 as $key=>$value){
-				$sql='insert into st_data (id_dev, id_agent, id_param, facts) values ('.Arr::get($value, 'ID_DEV').', 12, 11,' .Arr::get($value, 'COUNT').')';
-	try
-			{
-			$query = DB::query(Database::INSERT, $sql)
-			->execute(Database::instance('fb'));
-			} catch (Exception $e) {
-			}
-		}
-
-		
-	}
-	
-	
-	
-	
 	
 	public function analyt_result()// 26.02.2020 процедура получает данные по аналитике
 	{
-		
 		$sql='select distinct e.analit, count (*) from events e
 			where e.analit is not null
 			and e.datetime> CURRENT_TIMESTAMP - 1
@@ -272,16 +138,6 @@ class Model_Stat extends Model
 		->execute(Database::instance('fb'))
 		->as_array();
 		return $res;
-	}
-	
-	public function del_queue($id_dev)
-	{
-		if (!empty($id_dev))
-		{		$dev=implode(",",array_keys($id_dev));
-		$sql='delete from cardindev cd where cd.id_dev in ('.$dev.')';
-		$query = DB::query(Database::DELETE, $sql)
-		->execute(Database::instance('fb'));
-		}
 	}
 	
 	public function card_late_next_week_save_to_file()
@@ -328,9 +184,6 @@ class Model_Stat extends Model
 		fclose($fp); //Закрытие файла
 		return;
 	}
-	
-	
-	
 	
 	public function Get_people_late_next_week()
 	{
@@ -401,127 +254,6 @@ class Model_Stat extends Model
 		return $res;
 		
 	}
-	public function Get_unActiveCard()
-	{
-		$sql='select distinct p.id_pep, p.name, p.surname, p.patronymic, p.note,  o.name as org_name, o2.name as parent2, o3.name as parent3, o4.name as parent4, o.id_org, c.id_card, c.timeend, c."ACTIVE" as isactive from people p
-        join card c on c.id_pep=p.id_pep
-        join organization o on o.id_org=p.id_org
-        left join organization o2 on o.id_parent=o2.id_org
-        left join organization o3 on o2.id_parent=o3.id_org
-        left join organization o4 on o3.id_parent=o4.id_org
-		where c."ACTIVE"<1
-		order by c.timeend';
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'));
-		
-		
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res[$key]=$value;
-			$res[$key]['NAME']=iconv('windows-1251','UTF-8',$value['NAME']);
-			$res[$key]['PATRONYMIC']=iconv('windows-1251','UTF-8',$value['PATRONYMIC']);
-			$res[$key]['SURNAME']=iconv('windows-1251','UTF-8',$value['SURNAME']);
-			$res[$key]['ORG_NAME']=iconv('windows-1251','UTF-8',$value['ORG_NAME']);
-			$res[$key]['NOTE']=iconv('windows-1251','UTF-8',$value['NOTE']);
-			$res[$key]['MAX']=Arr::get($value, 'MAX');
-			//$res[$key]['ORG_PARENT']= $this->get_org_parent(Arr::get($value, 'ID_ORG')).' '.iconv('windows-1251','UTF-8',$value['ORG_NAME']);
-			$res[$key]['ORG_PARENT']= '..\\'
-					.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT4', '..')).'\\'
-							.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT3', '..')).'\\'
-									.iconv('windows-1251','UTF-8', Arr::get($value, 'PARENT2', '..')).'\\'
-											.iconv('windows-1251','UTF-8', Arr::get($value, 'ORG_NAME', '..'));
-											
-		}
-		
-		return $res;
-		
-	}
-	
-	public function get_org_parent($id_org)
-	{
-		
-		$result='';
-		return $result;
-				
-		$sql='select o.id_parent, o.name from organization o where o.id_org='.$id_org;
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		// рекурсия до корня
-		$id_parent=$query[0]['ID_PARENT'];
-		$result[]=iconv('windows-1251','UTF-8',$query[0]['NAME']);
-		// рекурсия до корня
-		while ($id_parent> 1)
-		{
-			$sql='select o.id_parent, o.name from organization o where o.id_org='.$id_parent;
-			$query = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->as_array();
-			$id_parent=$query[0]['ID_PARENT'];
-			$result[]=iconv('windows-1251','UTF-8',$query[0]['NAME']);
-		}
-		
-		return implode("/ ", array_reverse($result));
-	}
-	
-	
-	
-	public function repeat_load($id_dev)
-	{
-		if (!empty($id_dev))
-		{		$dev=implode(",",array_keys($id_dev));
-		$sql='update cardindev cd set cd.attempts=0 where cd.id_dev in ('.$dev.')';
-		$query = DB::query(Database::UPDATE, $sql)
-		->execute(Database::instance('fb'));
-		}
-	}
-	
-	
-	public function __detect_change_device_count()
-	{
-		$stat_day_befor = isset(Kohana::$config->load('artonitcity_config')->stat_day_befor)? Kohana::$config->load('artonitcity_config')->stat_day_befor : 1;
-		//Kohana::$config->write('artonitcity_config', 'test_config', 'data_config');
-		
-		
-		$sql='select std.id_order, sto.timestart, count(std.id_param) from st_order sto
-				left join st_data std on std.id_order=sto.id
-				where sto.timestart>\''.date("d.m.Y H:i:s",strtotime("-".$stat_day_befor." days")).'\'
-				and std.id_param=2
-				group by std.id_order, sto.timestart';
-		
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		$curr_count=0;
-		$res=array();
-		foreach ($query as $key =>$data)
-		{
-			$id_order=$data['ID_ORDER'];
-			if ($data['COUNT'] <> $curr_count )
-			{
-				$res[$id_order]['date']=$data['TIMESTART'];
-				$res[$id_order]['old_count']=$curr_count;
-				$res[$id_order]['new_count']=$data['COUNT'];
-				$curr_count=$data['COUNT'];
-			}
-		}
-		
-		return $res;
-	}
-	
-	
-	public function stop_load($id_dev)
-	{
-		if (!empty($id_dev))
-		{
-			$dev=implode(",",array_keys($id_dev));
-			$sql='update cardindev cd set cd.attempts='.$this->getmaxAttempts().' where cd.id_dev in ('.$dev.')';
-			$query = DB::query(Database::UPDATE, $sql)
-			->execute(Database::instance('fb'));
-		}
-		
-	}
 	
 	public function getmaxAttempts()
 	{
@@ -530,38 +262,6 @@ class Model_Stat extends Model
 		$st = ($st)? hexdec($st) : 100;
 		//return $st;
 		return 2;
-	}
-	
-	public function __GetOrder($id=FALSE)// получение нового ордера для статистики
-	{
-		$sql='delete from st_data std where std.id_dev in ('.$id.')';
-		$query = DB::query(Database::DELETE, $sql)
-		->execute(Database::instance('fb'));
-		
-		$sql='insert into st_order (id_service, ID_TS) values (1, '.$id.')';
-		try
-		{
-			$query = DB::query(Database::INSERT, $sql)
-			->execute(Database::instance('fb'));
-		} catch (Exception $e) {
-			
-			
-		}
-		$sql='select gen_id(gen_st_order_id, 0) from RDB$DATABASE';
-		$id = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->get('GEN_ID');
-		
-		return $id;
-	}
-	
-	public function __CloseOrder($id)// завершение ордера
-	{
-		$sql='update st_order set timeend=\'NOW\' where id='.$id;
-		$id = DB::query(Database::UPDATE, $sql)
-		->execute(Database::instance('fb'));
-		
-		return $id+1;
 	}
 	
 	public function ClearStat () //удаление данных более заданного периода
@@ -576,67 +276,6 @@ class Model_Stat extends Model
 		$id = DB::query(Database::UPDATE, $sql)
 		->execute(Database::instance('fb'));
 	}
-	
-	public function device_list()// получение списка устройства
-	{
-		$sql='select d2.id_dev as id1, d2.name as name1, ac.id_dev as id2, d.name as name2, d.id_reader, d2.id_server, s.name as s_name, s.ip, s.port, count( distinct c.id_card) as cc from ss_accessuser su
-				join access ac on su.id_accessname=ac.id_accessname
-				join device d on d.id_dev=ac.id_dev
-				join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
-				join server s on s.id_server=d2.id_server
-				join card c on c.id_pep=su.id_pep
-				group by d2.id_dev, d2.name, ac.id_dev, d.name, d.id_reader, d2.id_server, s.name, s.ip, s.port';
-		
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res[$value['ID2']]['ID_DOOR']=Arr::get($value, 'ID2');
-			$res[$value['ID2']]['ID_DEV']=Arr::get($value, 'ID1');
-			$res[$value['ID2']]['ID_TS']=Arr::get($value, 'ID_SERVER');
-			$res[$value['ID2']]['SERVER_NAME']=iconv('windows-1251','UTF-8', Arr::get($value, 'S_NAME'));
-			$res[$value['ID2']]['SERVER_IP']=$this->IntToIP(Arr::get($value, 'IP'));
-			$res[$value['ID2']]['SERVER_PORT']=Arr::get($value, 'PORT');
-			$res[$value['ID2']][ 'DEVICE_NAME']=iconv('windows-1251','UTF-8',Arr::get($value, 'NAME1'));//win->utf
-			$res[$value['ID2']][ 'DOOR_NAME']=iconv('windows-1251','UTF-8',Arr::get($value, 'NAME2'));
-			$res[$value['ID2']]['BASE_COUNT']=Arr::get($value, 'CC');
-			$res[$value['ID2']]['ID_READER']=Arr::get($value, 'ID_READER');
-			
-		}
-		return $res;
-	}
-	
-	
-	public function last_stat_order()// получение id последнего завершенного цилка опроса
-	{		$sql='select max(id) from st_order std where std.timeend is not null';
-	$id_order = DB::query(Database::SELECT, $sql)
-	->execute(Database::instance('fb'))
-	->get('MAX');
-	return $id_order;
-	}
-	
-	public function __stat_version_device ()//получение версий устройств по результатам последного опроса
-	{
-		$sql='select distinct std.facts, count(*) from st_data std
-			join st_order sto on sto.id=std.id_order
-			where sto.id ='.$this->last_stat_order().'
-			and std.id_param=1
-			group by std.facts';
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'));
-		
-		foreach ($query as $key=>$value)
-		{
-			$res[]=$value['FACT'].' '.$value['COUNT'];
-		}
-		return $res;
-	}
-	
-	
-	
 	
 	/** 11.03.2026 набор данных для окна 2 Оборудование
 	*/
@@ -657,7 +296,6 @@ class Model_Stat extends Model
 		return $res;
 		
 	}
-	
 	
 	/** 11.03.2026 набор данных для окна 3 Очередь загрузок
 	*/
@@ -687,93 +325,6 @@ class Model_Stat extends Model
 		return $res;
 		
 	}
-	
-	
-	
-	public function load_order()// вывод очереди карт на загрузку
-	{
-		$sql='select distinct cd.operation, cd.id_dev, d.name, d2.name as device, s.name as server, count (*) from cardindev cd
- join device d on d.id_dev=cd.id_dev
- join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
- join server s on d2.id_server=s.id_server
- where d."ACTIVE">0 and d2."ACTIVE">0 and cd.attempts<'.$this->getmaxAttempts().'
-  and d2.id_devtype in (1,2, 6)
- group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
- 
-	//22.12.2025 при использовании ТС4 нет ограничений на количество попыток
- 	$sql='select distinct cd.operation, cd.id_dev, d.name, d2.name as device, s.name as server, count (*) from cardindev cd
- join device d on d.id_dev=cd.id_dev
- join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
- join server s on d2.id_server=s.id_server
- where d."ACTIVE">0 and d2."ACTIVE">0 
-  and d2.id_devtype in (1,2, 6)
- group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
- 
- 
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res[$value['ID_DEV']]['ID_DEV']=Arr::get($value, 'ID_DEV');
-			$res[$value['ID_DEV']]['NAME']=iconv('windows-1251','UTF-8',Arr::get($value, 'NAME'));
-			$res[$value['ID_DEV']]['DEVICE']=iconv('windows-1251','UTF-8',Arr::get($value, 'DEVICE'));
-			$res[$value['ID_DEV']]['SERVER']=iconv('windows-1251','UTF-8',Arr::get($value, 'SERVER'));
-			if (Arr::get($value, 'OPERATION')==1) $res[$value['ID_DEV']]['COUNT_WRITE']=Arr::get($value, 'COUNT');
-			if (Arr::get($value, 'OPERATION')==2) $res[$value['ID_DEV']]['COUNT_DELETE']=Arr::get($value, 'COUNT');
-		}
-		
-		return $res;
-	}
-	
-	
-	public function __count_order_for_notactive()// вывод очереди карт на загрузку
-	{
-		$sql='select cd.operation, cd.id_dev, d.name from cardindev cd
- join device d on d.id_dev=cd.id_dev
- where d."ACTIVE"=0';
-		
-		$res = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		
-		->count();
-		
-		
-		
-		return $res;
-	}
-	
-	
-	public function load_order_overcount()// вывод очереди карт на загрузку с превышенным количеством попыток
-	{
-		$sql='select distinct cd.operation, cd.id_dev, d.name, d2.name as device, s.name as server, count (*) from cardindev cd
- join device d on d.id_dev=cd.id_dev
- join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
- join server s on d2.id_server=s.id_server
- where d."ACTIVE">0 and d2."ACTIVE">0 and cd.attempts>='.$this->getmaxAttempts().'
- and cd.attempts<200
- group by cd.operation , cd.id_dev, d.name , d2.name, s.name';
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		
-		$res=array();
-		foreach ($query as $key=>$value)
-		{
-			$res[$value['ID_DEV']]['ID_DEV']=Arr::get($value, 'ID_DEV');
-			$res[$value['ID_DEV']]['NAME']=iconv('windows-1251','UTF-8',Arr::get($value, 'NAME'));
-			$res[$value['ID_DEV']]['DEVICE']=iconv('windows-1251','UTF-8',Arr::get($value, 'DEVICE'));
-			$res[$value['ID_DEV']]['SERVER']=iconv('windows-1251','UTF-8',Arr::get($value, 'SERVER'));
-			if (Arr::get($value, 'OPERATION')==1) $res[$value['ID_DEV']]['COUNT_WRITE']=Arr::get($value, 'COUNT');
-			if (Arr::get($value, 'OPERATION')==2) $res[$value['ID_DEV']]['COUNT_DELETE']=Arr::get($value, 'COUNT');
-		}
-		
-		return $res;
-	}
-	
-	
 	
 	public function IntToIP ($intIP)// преобразование IP адреса
 	{
@@ -886,48 +437,6 @@ class Model_Stat extends Model
 		return $res;
 	}
 	
-	public function GetKeyCountStat_arr()// получение данных об устройстве из таблицы статистики. 
-	{
-		$res=array();
-	
-		$sql='select std.id, std.id_dev,  std.facts, std.id_param, std.time_insert, d2.id_reader,  d2.id_dev as door_id from st_data std
-                join device d on d.id_dev=std.id_dev
-                left join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader=std.id_param-3
-				 order by std.id_dev';
-			$query = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->as_array();
-			foreach ($query as $key=> $value)
-			{
-				if(!is_null(Arr::get($value, 'ID_READER')))
-				{
-					//заявляю пустые значения массивов
-					$res[$value['DOOR_ID']]['LINE'] = 'no_data';
-					$res[$value['DOOR_ID']]['VER'] = 'no_data';
-					$res[$value['DOOR_ID']]['COUNT'] = 'no_data';
-					$res[$value['DOOR_ID']]['BASE_COUNT_AT_TIME'] = -1;
-					$res[$value['DOOR_ID']]['TEST_MODE'] = 'no_data';
-					$res[$value['DOOR_ID']]['ID_READER'] =-1;
-					$res[$value['DOOR_ID']]['ID_READER'] =-1;
-					// ==================
-					
-					if(Arr::get($value, 'ID_PARAM') == 2) $res[$value['DOOR_ID']]['LINE'] = str_replace("\r\n","", trim(Arr::get($value, 'FACTS')));// version
-					if(Arr::get($value, 'ID_PARAM') == 1) $res[$value['DOOR_ID']]['VER'] = str_replace("\r\n","", trim(Arr::get($value, 'FACTS')));// reportstatus
-					if(Arr::get($value, 'ID_PARAM') == 7 ) $res[$value['DOOR_ID']]['COUNT'] = trim(Arr::get($value, 'FACTS'));// key count in device
-					if((Arr::get($value, 'ID_PARAM') == 3) or (Arr::get($value, 'ID_PARAM') == 4) ) $res[$value['DOOR_ID']]['COUNT'] = trim(Arr::get($value, 'FACTS'));// key count in device
-					if(Arr::get($value, 'ID_PARAM') == 8 ) $res[$value['DOOR_ID']]['BASE_COUNT_AT_TIME'] = trim(Arr::get($value, 'FACTS'));// key count in db in read time
-					
-					if(Arr::get($value, 'ID_PARAM') == 9 ) $res[$value['DOOR_ID']]['TEST_MODE'] = trim(Arr::get($value, 'FACTS'));// test mode in db in read time
-					
-					$res[$value['DOOR_ID']]['ID_READER'] = trim(Arr::get($value, 'ID_READER'));
-					$res[$value['DOOR_ID']]['TIME_INSERT'] = Arr::get($value, 'TIME_INSERT');
-					
-				}
-			}
-
-		return $res;
-	}
-	
 	public function parser_2($str)// прасер данных двупроходный
 	{
 		if(empty($str)) return '';
@@ -962,32 +471,6 @@ class Model_Stat extends Model
 		return $res;
 	}
 	
-	
-	
-	
-	public function GetKeyCountStat($id_dev, $id_order)// получение данных об устройстве из таблицы статистики. Выбираются данные последного завершенного опроса
-	{
-		
-		$sql='select std.facts, std.id_param, std.time_insert, d.id_reader from device d
-		join device d2 on d2.id_ctrl=d.id_ctrl and d2.id_reader is null
-		join st_data std on std.id_dev=d2.id_dev
-		where std.id_order = '.$id_order.' and d.id_dev='.$id_dev;
-		$query = DB::query(Database::SELECT, $sql)
-		->execute(Database::instance('fb'))
-		->as_array();
-		$res=array();
-		foreach ($query as $key=> $value)
-		{
-			if(Arr::get($value, 'ID_PARAM') == 2) $res['LINE'] = trim(Arr::get($value, 'FACTS'));
-			if(Arr::get($value, 'ID_PARAM') == 1) $res['VER'] = trim(Arr::get($value, 'FACTS'));
-			if(Arr::get($value, 'ID_PARAM') == 3) $res['DOOR0'] = trim(Arr::get($value, 'FACTS'));
-			if(Arr::get($value, 'ID_PARAM') == 4) $res['DOOR1'] = trim(Arr::get($value, 'FACTS'));
-			$res['ID_READER'] = trim(Arr::get($value, 'ID_READER'));
-			$res['TIME_INSERT'] = Arr::get($value, 'TIME_INSERT');
-		}
-		return $res;
-	}
-	
 	public function GetTRColor ($a, $b)//формирование цвета строки в таблице данных
 	{
 		//http://itchief.ru/lessons/bootstrap-3/30-bootstrap-3-tables
@@ -998,188 +481,31 @@ class Model_Stat extends Model
 		return $res;
 	}
 	
-	public function GetKeyCountDevice ($ip, $port, $name, $chanel)//получение количеста карту у указанного устройства
+	public function getDeviceInTestMode() // 20.04.2019 /Вывод id_dev, работающих в режиме TEST
 	{
-		$server = '127.0.0.1';
-		$port = 5666;
-		$smes = 'r55 login name="3", password="3"';
-		$smes1 = 'r55 enumdevices';
-		$smes2 = 'r55 exec device="'.iconv('windows-1251','UTF-8', $name).'", command="getkeycount door='.$chanel.'"';
-		$smes3 = 'r55 exec device="'.iconv('windows-1251','UTF-8', $name).'", command="reportstatus"';
-		$smes4 = 'r55 exec device="'.iconv('windows-1251','UTF-8', $name).'", command="getversion"';
-		$smes5 = 'r55 exec device="'.iconv('windows-1251','UTF-8', $name).'", command="getconfig"';
-		$line_ok='Yes';
-		$reply='';
-		
-		//создаем сокет для подключения ТСП
-		$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		
-		// создаем соединение с сервером
-		$connection = socket_connect($socket, $server, $port);
-		//if ($connection === false) die("Cannot connect to server {$server}:{$port}");
-		if ($connection === false) $this->redirect('errorpage?err=Cannot connect to server {$server}:{$port}');
-		$reply = socket_read($socket,4096);
-		
-		//авторизация
-		socket_write($socket, $smes."\r\n", strlen($smes."\r\n"));
-		//получаем ответ
-		$reply = socket_read($socket,4096);
-		
-		//проверки связи
-		socket_write($socket, iconv('UTF-8','windows-1251',$smes3)."\r\n", strlen(iconv('UTF-8','windows-1251',$smes3)."\r\n"));
-		//получаем ответ
-		$reply = socket_read($socket,4096);
-		
-		if(stripos($reply, $line_ok ))
-		{
-			//читаю версию контроллера.
-			socket_write($socket, iconv('UTF-8','windows-1251',$smes4)."\r\n", strlen(iconv('UTF-8','windows-1251',$smes4)."\r\n"));
-			
-			//получаем ответ
-			$reply = iconv('windows-1251','UTF-8', socket_read($socket,4096));
-			$res['ver']=socket_read($socket,4096);
-			/*
-			//читаю конфигурацию.
-			socket_write($socket, iconv('UTF-8','windows-1251',$smes4)."\r\n", strlen(iconv('UTF-8','windows-1251',$smes4)."\r\n"));
-			
-			//получаем ответ
-			$reply = iconv('windows-1251','UTF-8', socket_read($socket,4096));
-			$res['config']=socket_read($socket,4096);
-			
-			*/
-			//количество карт по двери 0.
-			socket_write($socket, iconv('UTF-8','windows-1251',$smes2)."\r\n", strlen(iconv('UTF-8','windows-1251',$smes2)."\r\n"));
-			
-			//получаем ответ
-			$reply = iconv('windows-1251','UTF-8', socket_read($socket,4096));
-			$reply=substr($reply, stripos($reply, 'OK KeyCount')+12, strlen($reply)-stripos($reply, 'OK KeyCount')-15);
-			
-		} else {
-			$reply='Err';
-			
-		}
-		
-		socket_close($socket);
-		$res['count']=$reply;
-		
-		//return $reply;
-		return $res;
-	}
-	
-	public function getVersion($id_dev)// получить версию контроллера из статистических данных ST_DATA
-	{
-		$sql='select * from st_data std where std.id_param=1
-			and std.id_dev='.$id_dev;
-			
-		$sql='select std.facts from device d
-			join device d2 on d2.id_ctrl=d.id_ctrl and d.id_reader is null
-			left join st_data std on std.id_dev=d.id_dev and std.id_param=1
-			where d2.id_dev='.$id_dev;
-			
-			
-		$query = DB::query(Database::SELECT, $sql)
+		$sql='select std.id_dev from st_data std where std.id_param=9 and std.facts = \'TEST_ON\'';
+		$query_test_on = DB::query(Database::SELECT, $sql)
 		->execute(Database::instance('fb'))
 		->as_array();
-		
-		if(count($query)>0)
-		{
-		$ver_ademant='66.';
-		$ver_artonit='www.artonit.ru';
-		$res='now_version';
-		if(substr_count(Arr::get($query[0], 'FACTS', ''), $ver_ademant)>0) $res='ademant';
-		if(substr_count(Arr::get($query[0], 'FACTS', ''), $ver_artonit)>0) $res='artonit';
-		} else {
-			$res='no_data';
-		}
-		
-		return $res;
+		return $query_test_on;
 	}
-
-		public function getAnalitic_for_Test_mode_ademant($id_dev)// аналитика для выяснения: а работает ли Адемант в режиме ТЕСТ/ Входной параметр - id точки прохода
+	
+	public function getDeviceStatData($id_dev) // 22.08.2024 выборка данных из таблицы st_data
+	{
+		$sql='select std.facts from st_data std
+			where std.id_param=113
+			and std.id_dev='.$id_dev;
+		
+		try
 		{
-			$sql='select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'
-				and e.id_eventtype=50
-				and e.id_dev='.$id_dev;
-			$count_50 = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('COUNT');
-			$sql='select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'
-				and e.id_eventtype=46
-				and e.id_dev='.$id_dev;
-			$count_46 = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('COUNT');
-				
-			$sql='select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'
-				and e.id_eventtype=65
-				and e.id_dev='.$id_dev;
-			$count_65 = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('COUNT');
-			
-			$mode='TEST_OFF';
-			if($count_50 == 0 and $count_46 == 0 and $count_65!=0) $mode='TEST_ON';
-			return $mode;
+		$result = DB::query(Database::SELECT, $sql)
+		->execute(Database::instance('fb'))
+		->get('FACTS');
+		return $result;
+		} catch (Exception $e) {
+			return '';
 		}
-		
-		public function getAnalitic_for_Test_mode_artonit($id_dev)// аналитика для Артонит: а работает ли Артонит в режиме ТЕСТ
-		{
-			$mode='TEST_OFF';
-			$sql='select count(*) from events e where e.datetime>\''.date("d.m.Y H:i:s",strtotime("-1 days")).'\'
-				and e.id_eventtype=145
-				and e.id_dev='.$id_dev;
-			$count_145 = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('COUNT');
-			if($count_145 > 0 ) $mode='TEST_ON';
-			return $mode;
-		}
-		
-		public function getDeviceInTestMode() // 20.04.2019 /Вывод id_dev, работающих в режиме TEST
-		{
-			$sql='select std.id_dev from st_data std where std.id_param=9 and std.facts = \'TEST_ON\'';
-			$query_test_on = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->as_array();
-			return $query_test_on;
-		}
-		
-		public function getDeviceStatData($id_dev) // 22.08.2024 выборка данных из таблицы st_data
-		{
-			$sql='select std.facts from st_data std
-				where std.id_param=113
-				and std.id_dev='.$id_dev;
-			
-			try
-			{
-			$result = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->get('FACTS');
-			return $result;
-			} catch (Exception $e) {
-				return '';
-			}
-		
-		}
-		
-		
-		public function getAnyDataFromStdata($id_param)
-		{
-			$res=array();
-			$sql='select std.id_dev, std.facts from st_data std
-				where std.id_param='.$id_param;
-			$result = DB::query(Database::SELECT, $sql)
-			->execute(Database::instance('fb'))
-			->as_array();
-			foreach($result as $key=>$value)
-			{
-				
-				$res[Arr::get($value, 'ID_DEV')] =  Arr::get($value, 'FACTS');
-				
-			}
-			return $res;
-		}
-		
-		
-		
+	
+	}
+	
 }
