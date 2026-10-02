@@ -10,7 +10,7 @@ return array(
 		
 		'collectAlarm'=>'Внимание!!!',
 		'delta_count'=>'Различия',
-		'City'=>'Артонит Сити Центр132',
+		'City'=>'Артонит Сити Центр',
 		'Load'=>'Контроллеры',
 		'Load_order' => 'Очередь загрузки',
 		'Show_all' => 'Показать все',
@@ -136,7 +136,6 @@ return array(
 		'SERVER'	=>	'Сервер',
 		'ID_DEV'	=>	'ID точки прохода',
 		'door_panel_title'	=>	'Информация о точке прохода (двери)',
-		'door_panel_title'	=>	'Информация о точке прохода (двери)',
 		'door_info'	=>	'Точка прохода id=:id_door,  :name, состояние :active.',
 		'device_info'	=>	'Контроллер id=:id_dev, :name, состояние :active.',
 		'server_info'	=>	'Транспортный сервер :name, состояние :active, IP адрес :ip, порт :port.',
@@ -162,7 +161,6 @@ return array(
 		'count_card_late_next_week' => 'Срок действия завершиться до count_day_befor_end_time',
 		'count_card_late' => '<b>Срок карты закончился</b>',
 		'card_late_next_week_info' => 'Список карт, срок действия закончится',
-		'load_table' => 'Очередь номеров карт для загрузки в контроллеры.<br>Количество точек прохода count_door.',
 		'load_table' => 'Количество точек прохода count_door.',
 		
 		'string_about'=>'База данных db, версия ver, developer.',
@@ -191,7 +189,6 @@ return array(
 		'total_key_in_device'=>'Количество карт в точке прохода :count.',
 		'people_without_card'=>'Сотрудники без карты',
 		'people_without_events'=>'Сотрудники без событий',
-		'card_late_next_week_info_2' => 'Сотрудники без событий',
 		'delete'=>'Удалить',
 		'people_without_card_delete'=>'Выбранные пользователи будут удалены! Вы согласны?',
 		'view_events'=>'Просмотр событий',

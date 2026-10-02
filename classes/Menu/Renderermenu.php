@@ -117,35 +117,86 @@ class Menu_Renderermenu {
         return '#';
     }
     
+    /**
+     * URI пункта меню для сравнения с текущим адресом.
+     *
+     * Отличается от get_url() тем, что возвращает «голый» URI без базового
+     * пути приложения: "dashboard", "people/peopleinfo", "dev/load_order".
+     * Именно в таком виде адрес отдаёт Request::current()->uri(), поэтому
+     * сравнивать нужно с ним, а не с URL::site() — тот добавляет "/city/".
+     *
+     * @param   array   $item  пункт меню
+     * @return  string  URI без обрамляющих слэшей; '' — если пункт не является
+     *                  внутренней ссылкой (внешняя ссылка, '#', javascript:)
+     */
+    private static function get_uri($item)
+    {
+        if (isset($item['route'])) {
+            $params = isset($item['params']) ? $item['params'] : array();
+            return trim(Route::get($item['route'])->uri($params), '/');
+        }
+
+        if ( ! isset($item['url'])) {
+            return '';
+        }
+
+        $url = (string) $item['url'];
+
+        // Внешние ссылки, заглушки и пустой адрес с текущим URI не сравниваем
+        if ($url === ''
+            || strpos($url, 'http://') === 0
+            || strpos($url, 'https://') === 0
+            || strpos($url, '//') === 0
+            || strpos($url, '#') === 0
+            || strpos($url, 'javascript:') === 0) {
+            return '';
+        }
+
+        return trim($url, '/');
+    }
+
     private static function is_active($item, $current_uri = null)
     {
         if ($current_uri === null) {
             $current_uri = Request::current()->uri();
         }
         
-        $item_url = self::get_url($item);
-        
-        if ($current_uri === $item_url) {
-            return true;
+        $current_uri = trim((string) $current_uri, '/');
+
+        // Корень приложения отдан маршруту 'default' (см. application/bootstrap.php),
+        // поэтому /city/ и /city/dashboard — одна и та же страница.
+        if ($current_uri === '') {
+            $default_route = Arr::get(Route::all(), 'default');
+            if ($default_route instanceof Route) {
+                $current_uri = trim((string) Arr::get($default_route->defaults(), 'controller'), '/');
+            }
         }
-        
-        if ($item_url === '/' && $current_uri === '') {
-            return true;
+
+        $item_uri = self::get_uri($item);
+
+        if ($item_uri !== '') {
+            // Пункт ведёт ровно на текущую страницу
+            if ($item_uri === $current_uri) {
+                return true;
+            }
+
+            // Пункт-раздел активен и на вложенных страницах: "people" — для
+            // "people/peopleinfo", но "dev/load" — не для "dev/load_order"
+            if (strpos($current_uri, $item_uri.'/') === 0) {
+                return true;
+            }
         }
-        
-        if ($item_url !== '/' && strpos($current_uri, $item_url) === 0) {
-            return true;
-        }
-        
+
         if (isset($item['active_for'])) {
             $active_for = (array) $item['active_for'];
             foreach ($active_for as $pattern) {
-                if (strpos($current_uri, $pattern) === 0) {
+                $pattern = trim((string) $pattern, '/');
+                if ($pattern !== '' && ($current_uri === $pattern || strpos($current_uri, $pattern.'/') === 0)) {
                     return true;
                 }
             }
         }
-        
+
         return false;
     }
     
