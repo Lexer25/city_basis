@@ -230,17 +230,23 @@ protected function _getODBC() {
     }
     
     /**
-     * Установка заголовка страницы
+     * Установка заголовка страницы.
+     *
+     * Вызывать можно и до parent::before(), и после: в первом случае заголовок
+     * подхватит _prepareTemplateData(), во втором метод обновит site в шаблоне.
      */
     protected function set_title($title) {
         $this->title = $title;
         
         // Если шаблон уже существует, обновляем данные
         if (isset($this->template) && is_object($this->template)) {
-            $site = $this->template->get('site');
-            if ($site !== null) {
-                $site['title'] = $title;
-                $this->template->set('site', $site);
+            // В Kohana View нет метода get(), используем прямой доступ к свойству
+            if (isset($this->template->site)) {
+                $site = $this->template->site;
+                if (is_array($site)) {
+                    $site['title'] = $title;
+                    $this->template->set('site', $site);
+                }
             }
         }
     }
