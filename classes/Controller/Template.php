@@ -46,7 +46,7 @@ class Controller_Template extends Kohana_Controller_Template {
         $has_auth = isset($this->template->auth);
         $has_version = isset($this->template->version);
         $has_flash = isset($this->template->flash);
-        $has_odbc = isset($this->template->has_odbc);
+        $has_odbc = isset($this->template->odbc);
 		$has_module = isset($this->template->module_info);
      
         // Подготавливаем данные только для отсутствующих ключей
@@ -282,61 +282,47 @@ protected function set_full_width($enabled = true) {
 					'full_info' => ''
 				);
 				
-				// Получаем текущий контроллер
-				$controller = $this->request->controller();
+				// Модуль определяем по файлу, из которого загружен контроллер,
+				// а не по совпадению имён: "devices" содержит "dev",
+				// "identifiertypref" содержит "identifier".
+				$file = FALSE;
+				try {
+					$reflection = new ReflectionClass(get_class($this));
+					$file = $reflection->getFileName();
+				} catch (Exception $e) {
+					$file = FALSE;
+				}
 				
-				// Получаем все загруженные модули
-				$modules = Kohana::modules();
-				
-				// Ищем модуль, к которому принадлежит текущий контроллер
-				foreach ($modules as $module_name => $module_path) {
-					// Проверяем, является ли имя контроллера частью имени модуля
-					// или проверяем, находится ли контроллер в директории модуля
-					if (strpos(strtolower($controller), strtolower($module_name)) !== false) {
-						$result['name'] = $module_name;
-						
-						// Пытаемся найти версию модуля
-						$version_constant = strtoupper($module_name) . '_VERSION';
-						if (defined($version_constant)) {
-							$result['version'] = constant($version_constant);
-						} else {
-							// Пытаемся найти версию в init.php модуля
-							$init_file = $module_path . 'init.php';
-							if (file_exists($init_file)) {
-								$content = file_get_contents($init_file);
-								// Ищем определение константы версии
-								preg_match('/define\s*\(\s*[\'"]' . preg_quote($version_constant, '/') . '[\'"]\s*,\s*[\'"]([^\'"]+)[\'"]\s*\)/', $content, $matches);
-								if (!empty($matches[1])) {
-									$result['version'] = $matches[1];
-								}
-							}
+				if ($file) {
+					$file = str_replace('\\', '/', $file);
+					$best = -1;
+					foreach (Kohana::modules() as $module_name => $module_path) {
+						$module_path = str_replace('\\', '/', $module_path);
+						// Побеждает модуль с самым длинным совпавшим путём: пути
+						// заканчиваются разделителем, поэтому "...\bas\" не
+						// совпадёт с "...\baseref\...".
+						if (strpos($file, $module_path) === 0 AND strlen($module_path) > $best) {
+							$best = strlen($module_path);
+							$result['name'] = $module_name;
 						}
-						
-						// Если версия не найдена, пробуем найти любую константу с _VERSION
-						if (empty($result['version'])) {
-							$all_constants = get_defined_constants();
-							foreach ($all_constants as $const_name => $const_value) {
-								if (strpos($const_name, '_VERSION') !== false) {
-									$possible_module = str_replace('_VERSION', '', $const_name);
-									if (strpos($controller, $possible_module) !== false) {
-										$result['name'] = $possible_module;
-										$result['version'] = $const_value;
-										break;
-									}
-								}
-							}
-						}
-						
-						// Формируем полную информацию
-						if (!empty($result['name']) && !empty($result['version'])) {
-							$result['full_info'] = __('Модуль: :module, Версия: :version', array(
-								':module' => HTML::chars($result['name']),
-								':version' => HTML::chars($result['version'])
-							));
-						}
-						
-						break;
 					}
+				}
+				
+				// Версия модуля — по принятому соглашению: константа
+				// <МОДУЛЬ>_VERSION определена в init.php каждого модуля.
+				if ($result['name'] !== '') {
+					$version_constant = strtoupper($result['name']) . '_VERSION';
+					if (defined($version_constant)) {
+						$result['version'] = constant($version_constant);
+					}
+				}
+				
+				// Формируем полную информацию
+				if ($result['name'] !== '' AND $result['version'] !== '') {
+					$result['full_info'] = __('Модуль: :module, Версия: :version', array(
+						':module' => HTML::chars($result['name']),
+						':version' => HTML::chars($result['version'])
+					));
 				}
 				
 				return $result;
