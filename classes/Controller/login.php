@@ -18,11 +18,25 @@ class Controller_Login extends Controller {
         $password = Arr::get($_POST, 'password', '');
         $remember = (bool) Arr::get($_POST, 'remember', false);
 
+        $session = Session::instance();
+
         if (Auth::instance()->login($username, $password, $remember)) {
-            Session::instance()->delete('login_errors');
+            $session->delete('login_errors');
+
+            // Успешный вход
+            $session->set('flash_message', array(
+                'type' => 'success',
+                'text' => __('Вы успешно авторизованы как :username', array(
+                    ':username' => $username,
+                )),
+            ));
         } else {
-            // прочитает Controller_Template::_getAuthData() через get_once()
-            Session::instance()->set('login_errors', array(__('Неверный логин или пароль')));
+            // Ошибка входа — и в форму, и в flash
+            $session->set('login_errors', array(__('Неверный логин или пароль')));
+            $session->set('flash_message', array(
+                'type' => 'error',
+                'text' => __('Неверный логин или пароль'),
+            ));
         }
 
         $this->redirect($this->request->referrer() ?: '/');

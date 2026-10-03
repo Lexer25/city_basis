@@ -2,14 +2,19 @@
 
 class Controller_Logout extends Controller {
 
-	public function action_index()
-	{
-		
-		Auth::instance()->logout();
-		Session::instance()->delete('username');
-		Session::instance()->delete('res');
-		$this->redirect('/');
-	}
+    public function action_index()
+    {
+        Auth::instance()->logout();
 
+        $session = Session::instance();
+        $session->delete('username');
+        $session->delete('res');
+
+        $session->set('flash_message', array(
+            'type' => 'info',
+            'text' => __('Вы вышли из системы'),
+        ));
+
+        $this->redirect('/');
+    }
 }
-
