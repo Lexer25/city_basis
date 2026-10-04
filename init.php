@@ -1,6 +1,6 @@
 <?php
 // MODPATH/about/init.php
-defined('BASIS_VERSION') OR define('BASIS_VERSION', '4.0.6');
+defined('BASIS_VERSION') OR define('BASIS_VERSION', '4.0.7');
 defined('CITY_BUILD') OR define('CITY_BUILD', '500');
 
 

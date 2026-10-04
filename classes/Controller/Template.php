@@ -8,6 +8,14 @@ class Controller_Template extends Kohana_Controller_Template {
     
    protected $is_admin = false;
    public $db = 'fb';
+
+   /**
+    * Флаг: flash-сообщение уже прочитано и передано в шаблон.
+    * Нужен потому, что View::__isset() возвращает FALSE для NULL,
+    * и повторный вызов _prepareTemplateData() снова дёрнул бы сессию.
+    */
+   protected $_flash_processed = FALSE;
+
 	/**
      * Переопределяем before() для автоматической подготовки данных
      */
@@ -45,7 +53,9 @@ class Controller_Template extends Kohana_Controller_Template {
         $has_menu = isset($this->template->menu);
         $has_auth = isset($this->template->auth);
         $has_version = isset($this->template->version);
-        $has_flash = isset($this->template->flash);
+        // Флаг «flash уже обработан»: View::__isset() возвращает FALSE для NULL,
+        // поэтому одного isset($this->template->flash) недостаточно.
+        $has_flash = $this->_flash_processed OR isset($this->template->flash);
         $has_odbc = isset($this->template->odbc);
 		$has_module = isset($this->template->module_info);
      
@@ -65,8 +75,10 @@ class Controller_Template extends Kohana_Controller_Template {
             ));
         }
         
+        // auth нужен всем: форма логина выводится и для неавторизованных,
+        // а _getAuthData() теперь не читает login_errors (см. ниже).
         if (!$has_auth) {
-            if($this->is_admin) $this->template->set('auth', $this->_getAuthData());
+            $this->template->set('auth', $this->_getAuthData());
         }
         
         if (!$has_version) {
@@ -75,6 +87,7 @@ class Controller_Template extends Kohana_Controller_Template {
         
         if (!$has_flash) {
             $this->template->set('flash', $this->_getFlashMessage());
+            $this->_flash_processed = TRUE;
         }
 	
 		if (!$has_odbc) {
@@ -113,15 +126,17 @@ protected function _getODBC() {
     
     /**
      * Получение данных авторизации
+     *
+     * Ошибки формы логина здесь НЕ читаются: они обрабатываются
+     * в _getFlashMessage() единообразно с общим flash-каналом и
+     * передаются в шаблон через $flash['login_errors'].
      */
     protected function _getAuthData() {
         $auth = Auth::instance();
-        $session = Session::instance();
         
         return array(
             'logged_in' => $auth->logged_in(),
             'username'  => $auth->logged_in() ? $auth->get_user() : '',
-            'errors'    => $session->get_once('login_errors', array()),
             'csrf_token' => $this->_getCsrfToken(),
             'post_data' => array(
                 'username' => Arr::get($_POST, 'username', ''),
@@ -193,30 +208,74 @@ protected function _getODBC() {
     }
     
     /**
-     * Получение flash-сообщения
+     * Получение flash-сообщения.
+     *
+     * Обрабатывает два независимых канала:
+     *   1. flash_message  — общее уведомление (успех/ошибка операции),
+     *                       рендерится в template.php;
+     *   2. login_errors   — ошибки формы логина,
+     *                       рендерится в top_menu.php у формы входа.
+     *
+     * Оба читаются и удаляются из сессии — это и делает их «flash».
+     *
+     * Возвращает:
+     *   - NULL                       — сообщений нет;
+     *   - массив с ключами type/text/class
+     *                                — есть общий flash (может содержать
+     *                                  и login_errors);
+     *   - массив с type='login_error',
+     *     пустыми text/class и ключом
+     *     login_errors               — есть только ошибки формы;
+     *                                template.php такой «псевдо-flash»
+     *                                не выводит (см. проверку class).
      */
     protected function _getFlashMessage() {
         $session = Session::instance();
-        $flash = $session->get('flash_message');
-        
-        if ($flash) {
+
+        $flash = NULL;
+
+        // 1. Общий flash-канал (успех/ошибка операции)
+        $message = $session->get('flash_message');
+        if ($message) {
             $session->delete('flash_message');
-            
-            $type = Arr::get($flash, 'type', 'info');
-            $alert_class = $this->_getAlertClass($type);
-            
-            return array(
-                'type' => $type,
-                'text' => Arr::get($flash, 'text', ''),
-                'class' => $alert_class,
+
+            $type = Arr::get($message, 'type', 'info');
+
+            $flash = array(
+                'type'  => $type,
+                'text'  => Arr::get($message, 'text', ''),
+                'class' => $this->_getAlertClass($type),
             );
         }
-        
-        return null;
+
+        // 2. Ошибки формы логина — отдельный канал, рендерится прямо у формы.
+        //    Читаем через get_once() (самоочищающийся) независимо от того,
+        //    авторизован пользователь или нет.
+        $login_errors = $session->get_once('login_errors', array());
+
+        if ($flash !== NULL) {
+            $flash['login_errors'] = $login_errors;
+        } elseif (!empty($login_errors)) {
+            // Есть только ошибки формы — отдаём их как «псевдо-flash»,
+            // чтобы top_menu их увидел, но в общий поток страницы
+            // (template.php) они не попали.
+            $flash = array(
+                'type'         => 'login_error',
+                'text'         => '',
+                'class'        => '',
+                'login_errors' => $login_errors,
+            );
+        }
+
+        return $flash;
     }
     
     /**
-     * Получение класса для alert
+     * Получение класса для alert.
+     *
+     * ВНИМАНИЕ: классы соответствуют Bootstrap 3. При обновлении
+     * до Bootstrap 4/5 потребуется адаптация (alert-* сохранены,
+     * но анимация `fade in` → `fade show` и т.д.).
      */
     protected function _getAlertClass($type) {
         $map = array(

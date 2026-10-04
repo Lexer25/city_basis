@@ -42,18 +42,21 @@
 <!-- ✅ Запасной вариант, если JS не сработает -->
 <body style="padding-top: 200px;">
 
-    <!-- Flash-сообщения -->
-    <?php if (!empty($flash)): ?>
-        <div class="alert <?php echo $flash['class']; ?> alert-dismissible fade in" role="alert">
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-            <?php echo htmlspecialchars($flash['text']); ?>
-        </div>
-    <?php endif; ?>
-
     <!-- Контейнер -->
     <div class="<?php echo (!empty($site['full_width'])) ? 'container-fluid' : 'container'; ?>">
+
+        <?php
+        // Псевдо-flash от login_errors (type = 'login_error') в общий поток
+        // не выводим — он рендерится в top_menu.php прямо у формы.
+        if (!empty($flash) && !empty($flash['class'])):
+        ?>
+            <div class="alert <?php echo $flash['class']; ?> alert-dismissible fade in" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <?php echo htmlspecialchars($flash['text']); ?>
+            </div>
+        <?php endif; ?>
         <span id="time-top"></span>
         
         <!-- Меню -->

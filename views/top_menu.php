@@ -107,13 +107,16 @@
                         </button>
                     <?php echo Form::close(); ?>
                     
-                    <!-- Ошибки -->
-                    <?php if (!empty($auth['errors'])): ?>
+					                    <!-- Ошибки формы логина -->
+                    <?php
+                    $login_errors = !empty($flash['login_errors']) ? $flash['login_errors'] : array();
+                    ?>
+                    <?php if (!empty($login_errors)): ?>
                         <div class="alert alert-danger alert-dismissible" style="margin-top: 5px;">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <?php foreach ($auth['errors'] as $error): ?>
+                            <?php foreach ($login_errors as $error): ?>
                                 <p style="margin: 0;"><?php echo HTML::chars($error); ?></p>
                             <?php endforeach; ?>
                         </div>
