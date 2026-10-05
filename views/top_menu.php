@@ -17,22 +17,23 @@
         <div style="float: left; padding: 5px 0;">
             <!-- Версия и сборка - первая строка -->
             <div style="font-size: 12px; color: #777; white-space: nowrap;">
-                <?php 
-                if (!empty($version['text'])){ 
-                    echo $version['text']; 
-                } 
-                
-                if (defined('CITY_BUILD')): ?>
-                    <span style="margin-left: 5px;">Сборка <?php echo CITY_BUILD; ?></span>
-                <?php endif; ?>
+                <?php
+                if (!empty($version['text'])) {
+                    echo $version['text'];
+                }
+
+                if (defined('CITY_BUILD')) {
+                    echo '<span style="margin-left: 5px;">Сборка ' . CITY_BUILD . '</span>';
+                }
+                ?>
             </div>
             
             <!-- ODBC - вторая строка -->
-            <?php if (!empty($odbc['dsn'])): ?>
+            <?php if (!empty($odbc['dsn'])) { ?>
                 <div style="font-size: 12px; color: #777; white-space: nowrap;">
                     <?php echo __('ODBC :odbc', array(':odbc'=>$odbc['dsn'])); ?>
                 </div>
-            <?php endif; ?>
+            <?php } ?>
             
             <!-- Время - третья строка -->
             <div style="font-size: 12px; color: #777; white-space: nowrap;">
@@ -40,39 +41,62 @@
             </div>
 
             <!-- Информация о модуле - четвертая строка -->
-            <?php if (!empty($module_info) && !empty($module_info['full_info'])): ?>
+            <?php if (!empty($module_info) && !empty($module_info['full_info'])) { ?>
                 <div style="padding: 2px 0;">
                     <span class="label label-primary">
                         <?php echo $module_info['full_info']; ?>
                     </span>
-                    <?php if (!empty($module_info['has_guide'])):
-                        // Файл лежит в C:\xampp\htdocs\city\images\doc.svg
+                    <?php
+                    if (!empty($module_info['has_guide'])) {
+                        // Файл лежит в C:\xampp\htdocs\city\images\help.svg
                         // URL::base() вернёт "/city/" (или "/", если проект в корне)
-                        $doc_icon_url = URL::base() . 'images/doc.svg';
                         $doc_icon_url = URL::base() . 'images/help.svg';
+
                         $link_html = '<img src="' . HTML::chars($doc_icon_url) . '" '
-                                   . 'class="doc-icon" width="16" height="16" alt="">'
-                                   . __('Справка');
+                                   . 'class="doc-icon" width="16" height="16" alt="">';
 
                         echo HTML::anchor(
                             'guide/' . $module_info['name'], $link_html,
                             array(
-                                'class' => 'label label-info',
-                                'style' => 'margin-left: 5px; text-decoration: none;',
-                                'title' => __('Открыть справку'),
+                                //'class' => 'label label-info',
+                                'style'  => 'margin-left: 5px; text-decoration: none;',
+                                'title'  => __('Открыть справку'),
+                                'target' => '_blank',
+                                'rel'    => 'noopener noreferrer',
                             ),
                             NULL,
                             FALSE
                         );
-                    endif; ?>
-                </div>
-            <?php endif; ?>
+                    }
+                    ?>
+                
+            <?php } 
+					$max_url = 'https://max.ru/id7724720302_bot';
+					$max_icon_url = URL::base() . 'images/max.svg';
+
+                        $link_html = '<img src="' . HTML::chars($max_icon_url) . '" '
+                                   . 'class="doc-icon" width="16" height="16" alt="">';
+
+                        echo HTML::anchor(
+                            $max_url, $link_html,
+                            array(
+                                //'class' => 'label label-info',
+                                'style'  => 'margin-left: 5px; text-decoration: none;',
+                                'title'  => __('MAX'),
+                                'target' => '_blank',
+                                'rel'    => 'noopener noreferrer',
+                            ),
+                            NULL,
+                            FALSE
+                        );
+			?>
+			</div>
         </div>
         
         <!-- Правая часть: авторизация -->
         <ul class="nav navbar-nav navbar-right">
             <li>
-                <?php if (!empty($auth['logged_in'])): ?>
+                <?php if (!empty($auth['logged_in'])) { ?>
                     <div class="navbar-text" style="padding-right: 15px;">
                         <span class="glyphicon glyphicon-user" style="margin-right: 5px;"></span>
                         <span style="display: inline-block; margin-right: 10px; vertical-align: middle;">
@@ -89,12 +113,15 @@
                             ); ?>
                         </span>
                     </div>
-                <?php else: ?>
+                <?php } else { ?>
                     <!-- Форма логина -->
-                    <?php echo Form::open('login', array('method' => 'post', 'class' => 'navbar-form form-inline')); ?>
-                        <?php if (!empty($auth['csrf_token'])): ?>
-                            <?php echo Form::hidden('csrf', $auth['csrf_token']); ?>
-                        <?php endif; ?>
+                    <?php
+                    echo Form::open('login', array('method' => 'post', 'class' => 'navbar-form form-inline'));
+
+                    if (!empty($auth['csrf_token'])) {
+                        echo Form::hidden('csrf', $auth['csrf_token']);
+                    }
+                    ?>
                         
                         <div class="form-group">
                             <label for="inputUsername" class="sr-only"><?php echo HTML::chars(__('Username')); ?></label>
@@ -125,22 +152,24 @@
                             <span class="glyphicon glyphicon-log-in"></span> 
                             <?php echo HTML::chars(__('Login')); ?>
                         </button>
-                    <?php echo Form::close(); 
-                    
+                    <?php
+                    echo Form::close();
+
                     // Ошибки формы логина
                     $login_errors = !empty($flash['login_errors']) ? $flash['login_errors'] : array();
-                    
-                    if (!empty($login_errors)): ?>
+
+                    if (!empty($login_errors)) {
+                    ?>
                         <div class="alert alert-danger alert-dismissible" style="margin-top: 5px;">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <?php foreach ($login_errors as $error): ?>
+                            <?php foreach ($login_errors as $error) { ?>
                                 <p style="margin: 0;"><?php echo HTML::chars($error); ?></p>
-                            <?php endforeach; ?>
+                            <?php } ?>
                         </div>
-                    <?php endif; ?>
-                <?php endif; ?>
+                    <?php } ?>
+                <?php } ?>
             </li>
         </ul>
         
