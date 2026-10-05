@@ -21,8 +21,8 @@
                 if (!empty($version['text'])){ 
                     echo $version['text']; 
                 } 
-                ?>
-                <?php if (defined('CITY_BUILD')): ?>
+                
+                if (defined('CITY_BUILD')): ?>
                     <span style="margin-left: 5px;">Сборка <?php echo CITY_BUILD; ?></span>
                 <?php endif; ?>
             </div>
@@ -38,13 +38,33 @@
             <div style="font-size: 12px; color: #777; white-space: nowrap;">
                 <?php echo __('timerefresh', array('tr' => date("d.m.Y H:i", time()))); ?>
             </div>
-            
+
             <!-- Информация о модуле - четвертая строка -->
             <?php if (!empty($module_info) && !empty($module_info['full_info'])): ?>
                 <div style="padding: 2px 0;">
                     <span class="label label-primary">
                         <?php echo $module_info['full_info']; ?>
                     </span>
+                    <?php if (!empty($module_info['has_guide'])):
+                        // Файл лежит в C:\xampp\htdocs\city\images\doc.svg
+                        // URL::base() вернёт "/city/" (или "/", если проект в корне)
+                        $doc_icon_url = URL::base() . 'images/doc.svg';
+                        $doc_icon_url = URL::base() . 'images/help.svg';
+                        $link_html = '<img src="' . HTML::chars($doc_icon_url) . '" '
+                                   . 'class="doc-icon" width="16" height="16" alt="">'
+                                   . __('Справка');
+
+                        echo HTML::anchor(
+                            'guide/' . $module_info['name'], $link_html,
+                            array(
+                                'class' => 'label label-info',
+                                'style' => 'margin-left: 5px; text-decoration: none;',
+                                'title' => __('Открыть справку'),
+                            ),
+                            NULL,
+                            FALSE
+                        );
+                    endif; ?>
                 </div>
             <?php endif; ?>
         </div>
@@ -105,13 +125,12 @@
                             <span class="glyphicon glyphicon-log-in"></span> 
                             <?php echo HTML::chars(__('Login')); ?>
                         </button>
-                    <?php echo Form::close(); ?>
+                    <?php echo Form::close(); 
                     
-					                    <!-- Ошибки формы логина -->
-                    <?php
+                    // Ошибки формы логина
                     $login_errors = !empty($flash['login_errors']) ? $flash['login_errors'] : array();
-                    ?>
-                    <?php if (!empty($login_errors)): ?>
+                    
+                    if (!empty($login_errors)): ?>
                         <div class="alert alert-danger alert-dismissible" style="margin-top: 5px;">
                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>

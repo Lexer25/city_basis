@@ -375,7 +375,10 @@ protected function set_full_width($enabled = true) {
 						$result['version'] = constant($version_constant);
 					}
 				}
-				
+
+				// Наличие справки: config/userguide.php в каталоге модуля
+				$result['has_guide'] = $this->_hasUserguideConfig($result['name']);
+
 				// Формируем полную информацию
 				if ($result['name'] !== '' AND $result['version'] !== '') {
 					$result['full_info'] = __('Модуль: :module, Версия: :version', array(
@@ -383,11 +386,37 @@ protected function set_full_width($enabled = true) {
 						':version' => HTML::chars($result['version'])
 					));
 				}
-				
+
 				return $result;
 			}
 
+		/**
+		 * Проверяет, есть ли у модуля конфиг userguide.php,
+		 * то есть зарегистрирована ли для него справка.
+		 *
+		 * @param   string  $module_name  имя модуля (ключ в Kohana::modules())
+		 * @return  boolean
+		 */
+		protected function _hasUserguideConfig($module_name)
+		{
+			if ($module_name === '')
+			{
+				return FALSE;
+			}
 
+			$modules = Kohana::modules();
+
+			if ( ! isset($modules[$module_name]))
+			{
+				return FALSE;
+			}
+
+			$config_file = rtrim($modules[$module_name], '/\\')
+						 . DIRECTORY_SEPARATOR . 'config'
+						 . DIRECTORY_SEPARATOR . 'userguide.php';
+
+			return is_file($config_file);
+		}
 
 
 }
