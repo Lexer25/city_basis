@@ -26,6 +26,7 @@
 	<?php echo HTML::style('static/css/city.css'); ?>
 	<?php echo HTML::style('static/css/2.31.3/theme.blue.min.css'); ?>
 	<?php echo HTML::style('static/css/2.31.3/jquery.tablesorter.pager.min.css'); ?>
+	<!-- jquery-ui.css специально для модальный окон-->
 	<?php echo HTML::style('static/css/jquery-ui.css'); ?>
     
     <!-- JavaScript -->
