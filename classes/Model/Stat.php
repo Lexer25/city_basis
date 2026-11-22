@@ -91,7 +91,10 @@ class Model_Stat extends Model
 		//получаю 7627DE
 		
 		//$key='0008119406';
+		//echo Debug::vars('94', $key);//exit;
+		//echo Debug::vars('94',STR_PAD(strtoupper($key), 10, '0', STR_PAD_LEFT));exit;		
 		
+		$key=STR_PAD(strtoupper($key), 10, '0', STR_PAD_LEFT);
 		$key_arr=str_split(str_pad(dechex ($key), 6, "0", STR_PAD_LEFT));
 		$numReverse2=array('0', '8','4','C','2','A','6','E','1','9','5','D','3','B','7','F');
 		
