@@ -8,6 +8,11 @@
             <?php echo isset($menu_html) ? $menu_html : ''; ?>
         </div>
  
+        <!-- Меню пользователя, выводится без авторизации-->
+        <div class="navbar-collapse collapse">
+            <?php echo isset($rest_html) ? $rest_html : ''; ?>
+        </div>
+ 
         <!-- Меню администратора, выводится после авторизации-->
         <div class="navbar-collapse collapse">
             <?php echo ($is_admin) ? $adm_html : ''; ?>

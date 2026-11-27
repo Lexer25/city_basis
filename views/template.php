@@ -64,6 +64,7 @@
         <?php 
         $menu_html = isset($menu['menu_html']) ? $menu['menu_html'] : '';
         $adm_html = isset($menu['adm_html']) ? $menu['adm_html'] : '';
+        $rest_html = isset($menu['rest_html']) ? $menu['rest_html'] : '';
         $auth_data = isset($auth) ? $auth : array();
         $version_data = isset($version) ? $version : array();
         $odbc_data = isset($odbc) ? $odbc : array();
@@ -72,6 +73,7 @@
         echo View::factory('top_menu', array(
             'menu_html' => $menu_html,
             'adm_html' => $adm_html,
+            'rest_html' => $rest_html,
             'auth' => $auth_data,
             'version' => $version_data,
             'odbc' => $odbc_data,

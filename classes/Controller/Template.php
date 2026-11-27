@@ -69,12 +69,13 @@ class Controller_Template extends Kohana_Controller_Template {
         }
         
         if (!$has_menu) {
+			
             $this->template->set('menu', array(
                 'menu_html' => Menu_Renderermenu::render('menu', 'nav navbar-nav'),
                 'adm_html' => Menu_Renderermenu::render('adm', 'nav navbar-nav'),
+                'rest_html' => Menu_Renderermenu::render('restmenu', 'nav navbar-nav'),
             ));
         }
-        
         // auth нужен всем: форма логина выводится и для неавторизованных,
         // а _getAuthData() теперь не читает login_errors (см. ниже).
         if (!$has_auth) {
